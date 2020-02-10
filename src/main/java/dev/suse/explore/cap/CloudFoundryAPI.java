@@ -27,91 +27,91 @@ import org.cloudfoundry.operations.CloudFoundryOperations;
 public class CloudFoundryAPI {
 
 
-@Bean
-DefaultConnectionContext connectionContext(@Value("${CF_API}") String apiHost) {
-    return DefaultConnectionContext.builder()
-        .apiHost(apiHost)
-        .build();
-}
+	@Bean
+	DefaultConnectionContext connectionContext(@Value("${CF_API}") String apiHost) {
+		return DefaultConnectionContext.builder()
+				.apiHost(apiHost)
+				.build();
+	}
 
-@Bean
-PasswordGrantTokenProvider tokenProvider(@Value("${CF_ADMIN_USER}") String username,
-                                         @Value("${CF_ADMIN_PASS}") String password) {
-    return PasswordGrantTokenProvider.builder()
-        .password(password)
-        .username(username)
-        .build();
-}
+	@Bean
+	PasswordGrantTokenProvider tokenProvider(@Value("${CF_ADMIN_USER}") String username,
+			@Value("${CF_ADMIN_PASS}") String password) {
+		return PasswordGrantTokenProvider.builder()
+				.password(password)
+				.username(username)
+				.build();
+	}
 
 
-@Bean
-ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-    return ReactorCloudFoundryClient.builder()
-        .connectionContext(connectionContext)
-        .tokenProvider(tokenProvider)
-        .build();
-}
+	@Bean
+	ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+		return ReactorCloudFoundryClient.builder()
+				.connectionContext(connectionContext)
+				.tokenProvider(tokenProvider)
+				.build();
+	}
 
-@Bean
-ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-    return ReactorDopplerClient.builder()
-        .connectionContext(connectionContext)
-        .tokenProvider(tokenProvider)
-        .build();
-}
+	@Bean
+	ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+		return ReactorDopplerClient.builder()
+				.connectionContext(connectionContext)
+				.tokenProvider(tokenProvider)
+				.build();
+	}
 
-@Bean
-ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-    return ReactorUaaClient.builder()
-        .connectionContext(connectionContext)
-        .tokenProvider(tokenProvider)
-        .build();
-}
+	@Bean
+	ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+		return ReactorUaaClient.builder()
+				.connectionContext(connectionContext)
+				.tokenProvider(tokenProvider)
+				.build();
+	}
 
-@Bean
-DefaultCloudFoundryOperations cloudFoundryOperations(CloudFoundryClient cloudFoundryClient,
-                                                     DopplerClient dopplerClient,
-                                                     UaaClient uaaClient,
-                                                     @Value("${DEFAULT_ORG}") String organization,
-                                                     @Value("${DEFAULT_SPACE}") String space) {
-    return DefaultCloudFoundryOperations.builder()
-            .cloudFoundryClient(cloudFoundryClient)
-            .dopplerClient(dopplerClient)
-            .uaaClient(uaaClient)
-            .organization(organization)
-            .space(space)
-            .build();
-}
+	@Bean
+	DefaultCloudFoundryOperations cloudFoundryOperations(CloudFoundryClient cloudFoundryClient,
+			DopplerClient dopplerClient,
+			UaaClient uaaClient,
+			@Value("${DEFAULT_ORG}") String organization,
+			@Value("${DEFAULT_SPACE}") String space) {
+		return DefaultCloudFoundryOperations.builder()
+				.cloudFoundryClient(cloudFoundryClient)
+				.dopplerClient(dopplerClient)
+				.uaaClient(uaaClient)
+				.organization(organization)
+				.space(space)
+				.build();
+	}
 
-private CloudFoundryAPI(){
+	private CloudFoundryAPI(){
 
-}
+	}
 
-  // TODO: Not sure if this needs to be singleton. Feel free to edit as needed or remove comment
-  private static CloudFoundryAPI instance = null;
-  public static CloudFoundryAPI getInstance() {
-    if(instance==null){
-      instance = new CloudFoundryAPI();
-    }
-    return instance;
-  }
+	// TODO: Not sure if this needs to be singleton. Feel free to edit as needed or remove comment
+	private static CloudFoundryAPI instance = null;
+	public static CloudFoundryAPI getInstance() {
+		if(instance==null){
+			instance = new CloudFoundryAPI();
+		}
+		return instance;
+	}
 
-  // TODO: Checks if user exists and returns 
-  public boolean userAlreadyExists(CloudFoundryOperations cloudFoundryOperations, String email) {
+	// TODO: Checks if user exists and returns 
+	public boolean userAlreadyExists(CloudFoundryOperations cloudFoundryOperations, String email) {
 
-    //CreateUserRequest
+		//CreateUserRequest
 
-    //cloudFoundryOperations.userAdmin().createUser()
+		//cloudFoundryOperations.userAdmin().createUser()
 
-    return false;
-  }
+		return false;
+	}
 
-  // TODO: create everything
-  // TODO: Better Exception?
-  public String buildEnvironmentForUser(String email) throws Exception{
+	// TODO: create everything
+	// TODO: Better Exception?
+	public String buildEnvironmentForUser(String email) throws Exception{
 
-    //TODO: personalize.
-    return "https://firstlook.cap.explore.suse.dev";
-  }
+		//TODO: personalize.
+		return "https://firstlook.cap.explore.suse.dev";
+	}
 
 }

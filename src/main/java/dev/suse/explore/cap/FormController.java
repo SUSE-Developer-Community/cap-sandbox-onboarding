@@ -12,34 +12,34 @@ import org.springframework.context.ApplicationContext;
 
 @RestController
 public class FormController {
-    private CloudFoundryAPI client = CloudFoundryAPI.getInstance();
+	private CloudFoundryAPI client = CloudFoundryAPI.getInstance();
 
-    @Autowired
-    private ApplicationContext context;
+	@Autowired
+	private ApplicationContext context;
 
-    @PostMapping("/addUser")
-    public RedirectView index(@ModelAttribute FormInput form, 
-                              @RequestParam(name = "fail") String onFailure,
-                              @RequestParam(name = "success") String onSuccess,
-                              @RequestParam(name = "exists") String onExists) {
+	@PostMapping("/addUser")
+	public RedirectView index(@ModelAttribute FormInput form, 
+			@RequestParam(name = "fail") String onFailure,
+			@RequestParam(name = "success") String onSuccess,
+			@RequestParam(name = "exists") String onExists) {
 
-        try {
-            String email = form.getEmail();
-    
-            if (client.userAlreadyExists(context.getBean(CloudFoundryOperations.class), email)) {
-                return new RedirectView(onExists);
-            }
+		try {
+			String email = form.getEmail();
 
-            String fisrtlookUrl = client.buildEnvironmentForUser(email);
+			if (client.userAlreadyExists(context.getBean(CloudFoundryOperations.class), email)) {
+				return new RedirectView(onExists);
+			}
 
-            //email.sendOnboardingEmail(email, firstlookUrl, stratosUrl);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new RedirectView(onFailure);
-        }
+			String fisrtlookUrl = client.buildEnvironmentForUser(email);
 
-        return new RedirectView(onSuccess);
-    }
-    
+			//email.sendOnboardingEmail(email, firstlookUrl, stratosUrl);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new RedirectView(onFailure);
+		}
+
+		return new RedirectView(onSuccess);
+	}
+
 }
