@@ -99,9 +99,9 @@ private CloudFoundryAPI(){
   // TODO: Checks if user exists and returns 
   public boolean userAlreadyExists(CloudFoundryOperations cloudFoundryOperations, String email) {
 
-    CreateUserRequest
+    //CreateUserRequest
 
-    cloudFoundryOperations.userAdmin().createUser()
+    //cloudFoundryOperations.userAdmin().createUser()
 
     return false;
   }
