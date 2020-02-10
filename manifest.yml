@@ -1,3 +1,9 @@
 applications:
 - name: onboarding
-  buildpack: nodejs_buildpack
+  buildpack: java_buildpack
+  env:
+    DEFAULT_ORG:
+    DEFAULT_SPACE:
+    CF_ADMIN_USER:
+    CF_ADMIN_PASS:
+    CF_API:
