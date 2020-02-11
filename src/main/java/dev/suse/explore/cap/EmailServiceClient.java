@@ -30,12 +30,13 @@ public class EmailServiceClient {
 
 		
 		Destination destination = new Destination().withToAddresses(email);
+		String data = "{\"stratos_url\":\""+stratos_url+"\",\"firstlook_url\":\""+firstlook_url+"\"}";
 
-		SendTemplatedEmailRequest req = new SendTemplatedEmailRequest()
-				.withDestination(destination)
-				.withSource(from_email)
-				.withTemplate(welcome_template)
-				.withTemplateData("{}");
+		SendTemplatedEmailRequest req = new SendTemplatedEmailRequest();
+				req.withDestination(destination);
+				req.withSource(from_email);
+				req.withTemplate(welcome_template);
+				req.withTemplateData(data);
 		
 		client.sendTemplatedEmail(req);
 	}

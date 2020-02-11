@@ -36,12 +36,12 @@ public class Configuration {
 	}
 
 	@Bean
-	EmailServiceClient email(@Value("@{SES_ACCESS_KEY}") String accessKey, 
-			@Value("@{SES_SECRET_KEY}") String secretKey, 
-			@Value("@{SES_REGION}") String region, 
-			@Value("@{SES_WELCOME_TEMPLATE}") String welcome_template, 
-			@Value("@{SES_SENDER}") String from_email, 
-			@Value("@{STRATOS_URL}") String stratos_url) {
+	EmailServiceClient email(@Value("${SES_ACCESS_KEY}") String accessKey, 
+			@Value("${SES_SECRET_KEY}") String secretKey, 
+			@Value("${SES_REGION}") String region, 
+			@Value("${SES_WELCOME_TEMPLATE}") String welcome_template, 
+			@Value("${SES_SENDER}") String from_email, 
+			@Value("${STRATOS_URL}") String stratos_url) {
 		return new EmailServiceClient(accessKey, secretKey, region, welcome_template, stratos_url, from_email);
 	}
 
