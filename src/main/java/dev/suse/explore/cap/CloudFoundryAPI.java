@@ -3,6 +3,8 @@ package dev.suse.explore.cap;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.doppler.DopplerClient;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.operations.applications.PushApplicationRequest;
+import org.cloudfoundry.operations.useradmin.CreateUserRequest;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -94,21 +96,29 @@ public class CloudFoundryAPI {
 			instance = new CloudFoundryAPI();
 		}
 		return instance;
-	}
+	}	
+	
+	@Value("${UAA_ORIGIN}")
+	String uaa_origin;
 
-	// TODO: Checks if user exists and returns 
-	public boolean userAlreadyExists(CloudFoundryOperations cloudFoundryOperations, String email) {
+	//This seems to work but I don't like using an exception to get a real return...
+	public boolean userAlreadyExists(CloudFoundryOperations ops, String email) {
 
-		//CreateUserRequest
-
-		//cloudFoundryOperations.userAdmin().createUser()
-
-		return false;
+		CreateUserRequest req = CreateUserRequest.builder().username(email).origin("cognito").build();
+		try {
+			//Block obviously blocks. But also bubbles any exceptions into the current thread
+			ops.userAdmin().create(req).block();
+			return false;
+		}catch(IllegalArgumentException e) {
+			return true;
+		}
 	}
 
 	// TODO: create everything
 	// TODO: Better Exception?
-	public String buildEnvironmentForUser(String email) throws Exception{
+	public String buildEnvironmentForUser(CloudFoundryOperations ops, String email) throws Exception{
+		
+		//PushApplicationRequest req = PushApplicationRequest.builder().application()
 
 		//TODO: personalize.
 		return "https://firstlook.cap.explore.suse.dev";

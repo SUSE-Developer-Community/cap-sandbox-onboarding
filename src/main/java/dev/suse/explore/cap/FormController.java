@@ -30,7 +30,7 @@ public class FormController {
 				return new RedirectView(onExists);
 			}
 
-			String fisrtlookUrl = client.buildEnvironmentForUser(email);
+			String fisrtlookUrl = client.buildEnvironmentForUser(context.getBean(CloudFoundryOperations.class), email);
 
 			//email.sendOnboardingEmail(email, firstlookUrl, stratosUrl);
 
