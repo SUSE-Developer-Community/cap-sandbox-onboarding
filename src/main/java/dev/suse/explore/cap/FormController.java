@@ -10,14 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 
+
 @RestController
 public class FormController {
-	private CloudFoundryAPI client = CloudFoundryAPI.getInstance();
 
 	@Autowired
-	private ApplicationContext context;
-	
-	private EmailServiceClient emailer = EmailServiceClient.getInstance("", "", "us-west-2");
+	CloudFoundryAPI client;
+
+	@Autowired
+	EmailServiceClient emailer;
 	
 	String stratosUrl = "";
 	String template_name = "";
@@ -31,13 +32,13 @@ public class FormController {
 		try {
 			String email = form.getEmail();
 
-			if (client.userAlreadyExists(context.getBean(CloudFoundryOperations.class), email)) {
+			if (client.userAlreadyExists(email)) {
 				return new RedirectView(onExists);
 			}
 
-			String firstlookUrl = client.buildEnvironmentForUser(context.getBean(CloudFoundryOperations.class), email);
+			String firstlookUrl = client.buildEnvironmentForUser(email);
 
-			emailer.sendWelcomeEmail(template_name, email, firstlookUrl, stratosUrl);
+			emailer.sendWelcomeEmail(email, firstlookUrl);
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -11,24 +11,26 @@ import com.amazonaws.services.simpleemail.model.SendTemplatedEmailRequest;
 
 public class EmailServiceClient {
 	private AmazonSimpleEmailService client;
+	private String welcome_template;
+	private String stratos_url;
 	
-	private EmailServiceClient(String accessKey, String secretKey, String region) {
+	public EmailServiceClient(String accessKey, String secretKey, String region, String welcome_template, String stratos_url) {
+		this.welcome_template = welcome_template;
+		this.stratos_url = stratos_url;
+		
 		BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
 		AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(creds);
 		client = AmazonSimpleEmailServiceClientBuilder.standard().withCredentials(credentialsProvider).withRegion(region).build();
 		
 	}
-	
-	public static EmailServiceClient getInstance(String accessKey, String secretKey, String region) {
-		return new EmailServiceClient(accessKey, secretKey, region);
-	}
-	
-	public void sendWelcomeEmail(String template_name, String email, String firstlook_url, String stratos_url) {
+
+	public void sendWelcomeEmail(String email, String firstlook_url) {
+
 		
 		Destination destination = new Destination().withToAddresses(email);
 		SendTemplatedEmailRequest req = new SendTemplatedEmailRequest()
 				.withDestination(destination)
-				.withTemplate(template_name)
+				.withTemplate(welcome_template)
 				.withTemplateData("{}");
 		
 		client.sendTemplatedEmail(req);
