@@ -16,6 +16,11 @@ public class FormController {
 
 	@Autowired
 	private ApplicationContext context;
+	
+	private EmailServiceClient emailer = EmailServiceClient.getInstance("", "", "us-west-2");
+	
+	String stratosUrl = "";
+	String template_name = "";
 
 	@PostMapping("/addUser")
 	public RedirectView index(@ModelAttribute FormInput form, 
@@ -30,9 +35,9 @@ public class FormController {
 				return new RedirectView(onExists);
 			}
 
-			String fisrtlookUrl = client.buildEnvironmentForUser(context.getBean(CloudFoundryOperations.class), email);
+			String firstlookUrl = client.buildEnvironmentForUser(context.getBean(CloudFoundryOperations.class), email);
 
-			//email.sendOnboardingEmail(email, firstlookUrl, stratosUrl);
+			emailer.sendWelcomeEmail(template_name, email, firstlookUrl, stratosUrl);
 
 		} catch (Exception e) {
 			e.printStackTrace();
