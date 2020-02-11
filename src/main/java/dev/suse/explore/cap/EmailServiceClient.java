@@ -13,10 +13,12 @@ public class EmailServiceClient {
 	private AmazonSimpleEmailService client;
 	private String welcome_template;
 	private String stratos_url;
+	private String from_email;
 	
-	public EmailServiceClient(String accessKey, String secretKey, String region, String welcome_template, String stratos_url) {
+	public EmailServiceClient(String accessKey, String secretKey, String region, String welcome_template, String stratos_url, String from_email) {
 		this.welcome_template = welcome_template;
 		this.stratos_url = stratos_url;
+		this.from_email = from_email;
 		
 		BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
 		AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(creds);
@@ -28,8 +30,10 @@ public class EmailServiceClient {
 
 		
 		Destination destination = new Destination().withToAddresses(email);
+
 		SendTemplatedEmailRequest req = new SendTemplatedEmailRequest()
 				.withDestination(destination)
+				.withSource(from_email)
 				.withTemplate(welcome_template)
 				.withTemplateData("{}");
 		
