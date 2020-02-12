@@ -38,7 +38,8 @@ public class FormController {
 
 			String firstlookUrl = client.buildEnvironmentForUser(email);
 
-			emailer.sendWelcomeEmail(email, firstlookUrl);
+//disabling until things are more stable so that we don't always get a /failed
+//			emailer.sendWelcomeEmail(email, firstlookUrl);
 
 		} catch (Exception e) {
 			e.printStackTrace();
