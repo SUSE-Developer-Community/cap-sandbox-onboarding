@@ -23,8 +23,8 @@ public class CloudFoundryAPI {
 	private ApplicationContext context;
 	
 	
-	@Value("${UAA_ORIGIN}")
-	String uaa_origin;
+//	@Value("${UAA_ORIGIN}")
+//	String uaa_origin;
 
 	//This seems to work but I don't like using an exception to get a real return...
 	//Is there a way to check if a user exists without creating it?
@@ -50,11 +50,13 @@ public class CloudFoundryAPI {
 		//**********create the org***************
 		//create org name from email: foo.bar@bar.com -> foo_bar_bar_com
 		String orgname = email.replace("^\\w", "_");
+		System.out.println("Creating org " + orgname + " for user " + email);
 
 		// TODO: replace quota name string with an env variable or something
 		CreateOrganizationRequest req = CreateOrganizationRequest.builder().organizationName(orgname).quotaDefinitionName("sandbox").build();
 		//Do I need to call .block() in the end? Why if so?
 		ops.organizations().create(req).block();
+
 
 		//**********make user org manager*************
 		ops.userAdmin().setOrganizationRole(
@@ -64,45 +66,45 @@ public class CloudFoundryAPI {
 		//***********create the default spaces************
 		// TODO: there is probably an elegant way to fold these into one call somehow
 		// TODO: Does the user get roles assigned for these spaces automatically?
-		ops.spaces().create(
-				CreateSpaceRequest.builder().name("dev").organization(orgname).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.MANAGER).username(email).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-				).block();
-
-		ops.spaces().create(
-				CreateSpaceRequest.builder().name("test").organization(orgname).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.MANAGER).username(email).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-				).block();
-
-		ops.spaces().create(
-				CreateSpaceRequest.builder().name("prod").organization(orgname).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.MANAGER).username(email).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-				).block();
-		
-		ops.spaces().create(
-				CreateSpaceRequest.builder().name("samples").organization(orgname).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.MANAGER).username(email).build()
-				).block();
-		ops.userAdmin().setSpaceRole(
-				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-				).block();
+//		ops.spaces().create(
+//				CreateSpaceRequest.builder().name("dev").organization(orgname).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.MANAGER).username(email).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.DEVELOPER).username(email).build()
+//				).block();
+//
+//		ops.spaces().create(
+//				CreateSpaceRequest.builder().name("test").organization(orgname).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.MANAGER).username(email).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.DEVELOPER).username(email).build()
+//				).block();
+//
+//		ops.spaces().create(
+//				CreateSpaceRequest.builder().name("prod").organization(orgname).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.MANAGER).username(email).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.DEVELOPER).username(email).build()
+//				).block();
+//		
+//		ops.spaces().create(
+//				CreateSpaceRequest.builder().name("samples").organization(orgname).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.MANAGER).username(email).build()
+//				).block();
+//		ops.userAdmin().setSpaceRole(
+//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.DEVELOPER).username(email).build()
+//				).block();
 
 
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()

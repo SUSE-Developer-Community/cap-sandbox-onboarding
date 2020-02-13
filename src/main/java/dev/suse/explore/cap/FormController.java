@@ -36,7 +36,9 @@ public class FormController {
 				return new RedirectView(onExists);
 			}
 
+			System.out.println("Building env for new user...");
 			String firstlookUrl = client.buildEnvironmentForUser(email);
+			System.out.println("Env for new user ready!");
 
 //disabling until things are more stable so that we don't always get a /failed
 //			emailer.sendWelcomeEmail(email, firstlookUrl);
