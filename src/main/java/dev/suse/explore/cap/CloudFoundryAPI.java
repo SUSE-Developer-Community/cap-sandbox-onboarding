@@ -7,31 +7,26 @@ import org.cloudfoundry.operations.useradmin.SetOrganizationRoleRequest;
 import org.cloudfoundry.operations.useradmin.SetSpaceRoleRequest;
 import org.cloudfoundry.operations.useradmin.SpaceRole;
 import org.cloudfoundry.operations.useradmin.OrganizationRole;
-
 import org.cloudfoundry.operations.CloudFoundryOperations;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 
-@Component
+
 public class CloudFoundryAPI {
+	private CloudFoundryOperations ops;
+	private String uaa_origin;
 	
-
-	@Autowired
-	private ApplicationContext context;
+	public CloudFoundryAPI(CloudFoundryOperations ops, String uaa_origin){
+		this.ops = ops;
+		this.uaa_origin = uaa_origin;
+	}
 	
-	
-//	@Value("${UAA_ORIGIN}")
-//	String uaa_origin;
 
 	//This seems to work but I don't like using an exception to get a real return...
 	//Is there a way to check if a user exists without creating it?
 	public boolean userAlreadyExists(String email) {
-		CloudFoundryOperations ops = context.getBean(CloudFoundryOperations.class);
 
-		CreateUserRequest req = CreateUserRequest.builder().username(email).origin("cognito").build();
+		CreateUserRequest req = CreateUserRequest.builder().username(email).origin(uaa_origin).build();
 		try {
 			//Block obviously blocks. But also bubbles any exceptions into the current thread
 			ops.userAdmin().create(req).block();
@@ -49,7 +44,6 @@ public class CloudFoundryAPI {
 	// TODO: create everything
 	// TODO: Better Exception?
 	public String buildEnvironmentForUser(String email) throws Exception{
-		CloudFoundryOperations ops = context.getBean(CloudFoundryOperations.class);
 		
 		//**********create the org***************
 		//create org name from email: foo.bar@bar.com -> foo_bar_bar_com
@@ -70,51 +64,43 @@ public class CloudFoundryAPI {
 		//***********create the default spaces************
 		// TODO: there is probably an elegant way to fold these into one call somehow
 		// TODO: Does the user get roles assigned for these spaces automatically?
-//		ops.spaces().create(
-//				CreateSpaceRequest.builder().name("dev").organization(orgname).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.MANAGER).username(email).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("dev").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-//				).block();
-//
-//		ops.spaces().create(
-//				CreateSpaceRequest.builder().name("test").organization(orgname).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.MANAGER).username(email).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("test").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-//				).block();
-//
-//		ops.spaces().create(
-//				CreateSpaceRequest.builder().name("prod").organization(orgname).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.MANAGER).username(email).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("prod").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-//				).block();
-//		
-//		ops.spaces().create(
-//				CreateSpaceRequest.builder().name("samples").organization(orgname).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.MANAGER).username(email).build()
-//				).block();
-//		ops.userAdmin().setSpaceRole(
-//				SetSpaceRoleRequest.builder().organizationName(orgname).spaceName("samples").spaceRole(SpaceRole.DEVELOPER).username(email).build()
-//				).block();
+
+		Mono.zip(
+			this.createSpace(orgname, "dev"),
+		  this.createSpace(orgname, "test"),
+		  this.createSpace(orgname, "prod"),
+		  this.createSpace(orgname, "samples")
+		).block();
+
+
+		Mono.zip(
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER),
+		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER),
+		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
+		this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER),
+		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
+		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER),
+		this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER)
+		).block();
 
 
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()
 
 		//TODO: personalize.
 		return "https://firstlook.cap.explore.suse.dev";
+	}
+
+	private Mono<Void> createSpace(String org, String space) {
+		return ops.spaces().create(
+				CreateSpaceRequest.builder().name(space).organization(org).build()
+				);
+	}
+
+	private Mono<Void> setSpaceRole(String username, String org, String space, SpaceRole role){
+		return ops.userAdmin().setSpaceRole(
+			SetSpaceRoleRequest.builder().organizationName(org).spaceName(space).spaceRole(role).username(username).build()
+			);
 	}
 
 }

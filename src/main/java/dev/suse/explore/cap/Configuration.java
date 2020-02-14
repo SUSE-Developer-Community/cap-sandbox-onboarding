@@ -83,4 +83,9 @@ public class Configuration {
 				.space(space)
 				.build();
 	}
+
+	@Bean 
+	CloudFoundryAPI cloudFoundryAPI(DefaultCloudFoundryOperations cloudFoundryOperations, @Value("${UAA_ORIGIN}") String uaa_origin) {
+		return new CloudFoundryAPI(cloudFoundryOperations, uaa_origin);
+	}
 }
