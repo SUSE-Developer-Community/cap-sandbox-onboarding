@@ -83,18 +83,39 @@ public class CloudFoundryAPI {
 			System.err.println(e.getMessage());
 		}).block();
 
-		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in all created spaces...");
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in dev...");
 		Mono.zip(
-		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER)
+		  this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
+			this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER)
 		).doOnError((Throwable e)->{
-			System.err.println("Error creating Roles");
+			System.err.println("Error creating Dev Roles");
+			System.err.println(e.getMessage());
+		}).block();
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in test...");
+		Mono.zip(
+		  this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER),
+		  this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER)
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Test Roles");
+			System.err.println(e.getMessage());
+		}).block();
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in prod...");
+		Mono.zip(
+	    this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER),
+			this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER)
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Prod Roles");
+			System.err.println(e.getMessage());
+		}).block();
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in samples...");
+		Mono.zip(
+		  this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER),
+	    this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER)
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Samples Roles");
 			System.err.println(e.getMessage());
 		}).block();
 
