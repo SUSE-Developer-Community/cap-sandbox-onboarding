@@ -120,7 +120,7 @@ global $current_user, $user_login;
   $success_url = urlencode(get_site_url().get_option("success_page"));
   $fail_url = urlencode(get_site_url().get_option("fail_page"));
   $exists_url = urlencode(get_site_url().get_option("exists_page"));
-  $btn_txt = get_option("button_text")
+  $btn_txt = get_option("button_text");
 
   $form_url = $onboarding_url."?success=".$success_url."&fail=".$fail_url."&exists=".$exists_url;
 
