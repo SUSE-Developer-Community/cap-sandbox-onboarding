@@ -37,9 +37,13 @@ public class CloudFoundryAPI {
 			ops.userAdmin().create(req).block();
 			return false;
 		}catch(IllegalArgumentException e) {
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 			return true;
 		}
+	}
+
+	public String cleanEmail(String email){
+		return email.replaceAll("\\W", "_");
 	}
 
 	// TODO: create everything
@@ -49,7 +53,7 @@ public class CloudFoundryAPI {
 		
 		//**********create the org***************
 		//create org name from email: foo.bar@bar.com -> foo_bar_bar_com
-		String orgname = email.replace("^\\w", "_");
+		String orgname = this.cleanEmail(email);
 		System.out.println("Creating org " + orgname + " for user " + email);
 
 		// TODO: replace quota name string with an env variable or something
