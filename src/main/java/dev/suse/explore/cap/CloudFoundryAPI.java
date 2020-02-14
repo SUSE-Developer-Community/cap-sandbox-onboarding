@@ -48,7 +48,7 @@ public class CloudFoundryAPI {
 		//**********create the org***************
 		//create org name from email: foo.bar@bar.com -> foo_bar_bar_com
 		String orgname = this.cleanEmail(email);
-		System.out.println("Creating org " + orgname + " for user " + email);
+		System.out.println("Creating org " + orgname + " for user " + email + "...");
 
 		// TODO: replace quota name string with an env variable or something
 		CreateOrganizationRequest req = CreateOrganizationRequest.builder().organizationName(orgname).quotaDefinitionName("sandbox").build();
@@ -65,7 +65,7 @@ public class CloudFoundryAPI {
 		// TODO: there is probably an elegant way to fold these into one call somehow
 		// TODO: Does the user get roles assigned for these spaces automatically?
 
-		System.out.println("Creating Spaces");
+		System.out.println("Creating spaces prod and samples for org " + orgname + "...");
 		Mono.zip(
 		  this.createSpace(orgname, "prod"),
 		  this.createSpace(orgname, "samples")
@@ -74,7 +74,7 @@ public class CloudFoundryAPI {
 			System.err.println(e.getMessage());
 		}).block();
 
-		System.out.println("Creating Spaces");
+		System.out.println("Creating spaces dev and test for org " + orgname + "...");
 		Mono.zip(
 			this.createSpace(orgname, "dev"),
 		  this.createSpace(orgname, "test")
@@ -83,7 +83,7 @@ public class CloudFoundryAPI {
 			System.err.println(e.getMessage());
 		}).block();
 
-		System.out.println("Creating Roles");
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in all created spaces...");
 		Mono.zip(
 		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
 		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER),
