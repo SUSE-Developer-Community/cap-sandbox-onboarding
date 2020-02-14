@@ -65,24 +65,38 @@ public class CloudFoundryAPI {
 		// TODO: there is probably an elegant way to fold these into one call somehow
 		// TODO: Does the user get roles assigned for these spaces automatically?
 
+		System.out.println("Creating Spaces");
 		Mono.zip(
-			this.createSpace(orgname, "dev"),
-		  this.createSpace(orgname, "test"),
 		  this.createSpace(orgname, "prod"),
 		  this.createSpace(orgname, "samples")
-		).block();
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Space");
+			System.err.println(e.getMessage());
+		}).block();
 
+		System.out.println("Creating Spaces");
+		Mono.zip(
+			this.createSpace(orgname, "dev"),
+		  this.createSpace(orgname, "test")
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Space");
+			System.err.println(e.getMessage());
+		}).block();
 
+		System.out.println("Creating Roles");
 		Mono.zip(
 		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
 		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER),
 		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
+		this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER),
 		this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER),
 		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
 		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER),
 		this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER)
-		).block();
+		).doOnError((Throwable e)->{
+			System.err.println("Error creating Roles");
+			System.err.println(e.getMessage());
+		}).block();
 
 
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()
