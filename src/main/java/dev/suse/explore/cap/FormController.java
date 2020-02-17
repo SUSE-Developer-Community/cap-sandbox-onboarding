@@ -19,9 +19,6 @@ public class FormController {
 
 	@Autowired
 	EmailServiceClient emailer;
-	
-	String stratosUrl = "";
-	String template_name = "";
 
 	@PostMapping("/addUser")
 	public RedirectView index(@ModelAttribute FormInput form, 
