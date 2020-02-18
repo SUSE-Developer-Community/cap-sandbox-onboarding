@@ -33,12 +33,14 @@ public class FormController {
 				return new RedirectView(onExists);
 			}
 
-			System.out.println("Building env for new user...");
-			String firstlookUrl = client.buildEnvironmentForUser(email);
-			System.out.println("Env for new user ready!");
+			this.createEnvironmentInThread(email);
 
-//disabling until things are more stable so that we don't always get a /failed
-//			emailer.sendWelcomeEmail(email, firstlookUrl);
+// 			System.out.println("Building env for new user...");
+// 			String firstlookUrl = client.buildEnvironmentForUser(email);
+// 			System.out.println("Env for new user ready!");
+
+// //disabling until things are more stable so that we don't always get a /failed
+// 			emailer.sendWelcomeEmail(email, firstlookUrl);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -46,6 +48,26 @@ public class FormController {
 		}
 
 		return new RedirectView(onSuccess);
+	}
+
+	private void createEnvironmentInThread(String email) {
+
+		new Thread(){
+			public void run(){
+				try {
+					
+				System.out.println("Building env for new user...");
+				String firstlookUrl = client.buildEnvironmentForUser(email);
+				System.out.println("Env for new user ready!");
+
+	//disabling until things are more stable so that we don't always get a /failed
+				emailer.sendWelcomeEmail(email, firstlookUrl);
+				} catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}.start();
+
 	}
 
 }

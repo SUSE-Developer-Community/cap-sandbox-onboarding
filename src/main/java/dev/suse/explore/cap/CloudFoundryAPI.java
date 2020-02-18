@@ -26,13 +26,22 @@ public class CloudFoundryAPI {
 	//Is there a way to check if a user exists without creating it?
 	public boolean userAlreadyExists(String email) {
 
-		CreateUserRequest req = CreateUserRequest.builder().username(email).origin(uaa_origin).build();
+		CreateUserRequest req = CreateUserRequest
+			.builder()
+			.username(email)
+			.origin(uaa_origin)
+			//.password("Password")
+			.build();
 		try {
 			//Block obviously blocks. But also bubbles any exceptions into the current thread
-			ops.userAdmin().create(req).block();
+			ops.userAdmin().create(req).doOnError((Throwable e)->{
+				System.err.println("Error creating User " + email);
+				System.err.println(e.getMessage());
+			}).block();
 			return false;
 		}catch(IllegalArgumentException e) {
 			System.err.println(e.getMessage());
+			e.printStackTrace();
 			return true;
 		}
 	}
@@ -66,40 +75,33 @@ public class CloudFoundryAPI {
 		// TODO: Does the user get roles assigned for these spaces automatically?
 
 		System.out.println("Creating spaces prod and samples for org " + orgname + "...");
-
-		  this.createSpace(orgname, "prod");
-		  this.createSpace(orgname, "samples");
+		this.createSpace(orgname, "prod");
+		this.createSpace(orgname, "samples");
 
 
 		System.out.println("Creating spaces dev and test for org " + orgname + "...");
-
-			this.createSpace(orgname, "dev");
-		  this.createSpace(orgname, "test");
+		this.createSpace(orgname, "dev");
+		this.createSpace(orgname, "test");
 
 
 		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in dev...");
-
-		  this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER);
-			this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER);
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER);
 
 
 		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in test...");
-
-		  this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER);
-		  this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER);
+		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER);
 	
 
 		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in prod...");
-
 	    this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER);
-			this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER);
+		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER);
 	
 
 		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in samples...");
-		//Mono.zip(
-		  this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER);
 	    this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER);
-		//).block();
 
 
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()
