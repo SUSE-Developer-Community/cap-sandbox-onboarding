@@ -8,6 +8,17 @@ import org.cloudfoundry.operations.useradmin.SetSpaceRoleRequest;
 import org.cloudfoundry.operations.useradmin.SpaceRole;
 import org.cloudfoundry.operations.useradmin.OrganizationRole;
 import org.cloudfoundry.operations.CloudFoundryOperations;
+import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.doppler.DopplerClient;
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.DefaultConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.uaa.UaaClient;
 
 import reactor.core.publisher.Mono;
 
@@ -16,8 +27,39 @@ public class CloudFoundryAPI {
 	private CloudFoundryOperations ops;
 	private String uaa_origin;
 	
-	public CloudFoundryAPI(CloudFoundryOperations ops, String uaa_origin){
-		this.ops = ops;
+	public CloudFoundryAPI(String apiHost, 
+	String username, 
+	String password, 
+	String org, 
+	String space, 
+	String uaa_origin){
+
+		DefaultConnectionContext connectionContext = DefaultConnectionContext.builder()
+		.apiHost(apiHost)
+		.build();
+
+		PasswordGrantTokenProvider tokenProvider = PasswordGrantTokenProvider.builder()
+		.password(password)
+		.username(username)
+		.build();
+
+		this.ops = DefaultCloudFoundryOperations.builder()
+		.cloudFoundryClient(ReactorCloudFoundryClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.dopplerClient(ReactorDopplerClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.uaaClient(ReactorUaaClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.organization(org)
+		.space(space)
+		.build();
+
 		this.uaa_origin = uaa_origin;
 	}
 	

@@ -14,8 +14,8 @@ import org.springframework.context.ApplicationContext;
 @RestController
 public class FormController {
 
-	@Autowired
-	CloudFoundryAPI client;
+	// @Autowired
+	// CloudFoundryAPI client;
 
 	@Autowired
 	EmailServiceClient emailer;
@@ -25,21 +25,29 @@ public class FormController {
 			@RequestParam(name = "fail") String onFailure,
 			@RequestParam(name = "success") String onSuccess,
 			@RequestParam(name = "exists") String onExists) {
-
+		CloudFoundryAPI client = new CloudFoundryAPI(
+			System.getenv("CF_API"), 
+			System.getenv("CF_ADMIN_USER"), 
+			System.getenv("CF_ADMIN_PASS"), 
+			System.getenv("DEFAULT_ORG"), 
+			System.getenv("DEFAULT_SPACE"), 
+			System.getenv("UAA_ORIGIN")
+			);
 		try {
 			String email = form.getEmail();
+			
 
 			if (client.userAlreadyExists(email)) {
 				return new RedirectView(onExists);
 			}
 
-			this.createEnvironmentInThread(email);
+			this.createEnvironmentInThread(client, email);
 
 // 			System.out.println("Building env for new user...");
 // 			String firstlookUrl = client.buildEnvironmentForUser(email);
 // 			System.out.println("Env for new user ready!");
 
-// //disabling until things are more stable so that we don't always get a /failed
+// //disabling until things are more stable so that we don"t always get a /failed
 // 			emailer.sendWelcomeEmail(email, firstlookUrl);
 
 		} catch (Exception e) {
@@ -50,7 +58,7 @@ public class FormController {
 		return new RedirectView(onSuccess);
 	}
 
-	private void createEnvironmentInThread(String email) {
+	private void createEnvironmentInThread(CloudFoundryAPI client, String email) {
 
 		new Thread(){
 			public void run(){
