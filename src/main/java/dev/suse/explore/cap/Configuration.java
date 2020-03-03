@@ -19,21 +19,21 @@ import org.springframework.stereotype.Component;
 public class Configuration {
 
 
-	@Bean
-	DefaultConnectionContext connectionContext(@Value("${CF_API}") String apiHost) {
-		return DefaultConnectionContext.builder()
-				.apiHost(apiHost)
-				.build();
-	}
+	// @Bean
+	// DefaultConnectionContext connectionContext(@Value("${CF_API}") String apiHost) {
+	// 	return DefaultConnectionContext.builder()
+	// 			.apiHost(apiHost)
+	// 			.build();
+	// }
 
-	@Bean
-	PasswordGrantTokenProvider tokenProvider(@Value("${CF_ADMIN_USER}") String username,
-			@Value("${CF_ADMIN_PASS}") String password) {
-		return PasswordGrantTokenProvider.builder()
-				.password(password)
-				.username(username)
-				.build();
-	}
+	// @Bean
+	// PasswordGrantTokenProvider tokenProvider(@Value("${CF_ADMIN_USER}") String username,
+	// 		@Value("${CF_ADMIN_PASS}") String password) {
+	// 	return PasswordGrantTokenProvider.builder()
+	// 			.password(password)
+	// 			.username(username)
+	// 			.build();
+	// }
 
 	@Bean
 	EmailServiceClient email(@Value("${SES_ACCESS_KEY}") String accessKey, 
@@ -45,47 +45,47 @@ public class Configuration {
 		return new EmailServiceClient(accessKey, secretKey, region, welcome_template, stratos_url, from_email);
 	}
 
-	@Bean
-	ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-		return ReactorCloudFoundryClient.builder()
-				.connectionContext(connectionContext)
-				.tokenProvider(tokenProvider)
-				.build();
-	}
+	// @Bean
+	// ReactorCloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+	// 	return ReactorCloudFoundryClient.builder()
+	// 			.connectionContext(connectionContext)
+	// 			.tokenProvider(tokenProvider)
+	// 			.build();
+	// }
 
-	@Bean
-	ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-		return ReactorDopplerClient.builder()
-				.connectionContext(connectionContext)
-				.tokenProvider(tokenProvider)
-				.build();
-	}
+	// @Bean
+	// ReactorDopplerClient dopplerClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+	// 	return ReactorDopplerClient.builder()
+	// 			.connectionContext(connectionContext)
+	// 			.tokenProvider(tokenProvider)
+	// 			.build();
+	// }
 
-	@Bean
-	ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-		return ReactorUaaClient.builder()
-				.connectionContext(connectionContext)
-				.tokenProvider(tokenProvider)
-				.build();
-	}
+	// @Bean
+	// ReactorUaaClient uaaClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
+	// 	return ReactorUaaClient.builder()
+	// 			.connectionContext(connectionContext)
+	// 			.tokenProvider(tokenProvider)
+	// 			.build();
+	// }
 
-	@Bean
-	DefaultCloudFoundryOperations cloudFoundryOperations(CloudFoundryClient cloudFoundryClient,
-			DopplerClient dopplerClient,
-			UaaClient uaaClient,
-			@Value("${DEFAULT_ORG}") String organization,
-			@Value("${DEFAULT_SPACE}") String space) {
-		return DefaultCloudFoundryOperations.builder()
-				.cloudFoundryClient(cloudFoundryClient)
-				.dopplerClient(dopplerClient)
-				.uaaClient(uaaClient)
-				.organization(organization)
-				.space(space)
-				.build();
-	}
+	// @Bean
+	// DefaultCloudFoundryOperations cloudFoundryOperations(CloudFoundryClient cloudFoundryClient,
+	// 		DopplerClient dopplerClient,
+	// 		UaaClient uaaClient,
+	// 		@Value("${DEFAULT_ORG}") String organization,
+	// 		@Value("${DEFAULT_SPACE}") String space) {
+	// 	return DefaultCloudFoundryOperations.builder()
+	// 			.cloudFoundryClient(cloudFoundryClient)
+	// 			.dopplerClient(dopplerClient)
+	// 			.uaaClient(uaaClient)
+	// 			.organization(organization)
+	// 			.space(space)
+	// 			.build();
+	// }
 
-	@Bean 
-	CloudFoundryAPI cloudFoundryAPI(DefaultCloudFoundryOperations cloudFoundryOperations, @Value("${UAA_ORIGIN}") String uaa_origin) {
-		return new CloudFoundryAPI(cloudFoundryOperations, uaa_origin);
-	}
+	// @Bean 
+	// CloudFoundryAPI cloudFoundryAPI(DefaultCloudFoundryOperations cloudFoundryOperations, @Value("${UAA_ORIGIN}") String uaa_origin) {
+	// 	return new CloudFoundryAPI(cloudFoundryOperations, uaa_origin);
+	// }
 }

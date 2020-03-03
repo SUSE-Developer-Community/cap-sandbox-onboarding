@@ -8,6 +8,17 @@ import org.cloudfoundry.operations.useradmin.SetSpaceRoleRequest;
 import org.cloudfoundry.operations.useradmin.SpaceRole;
 import org.cloudfoundry.operations.useradmin.OrganizationRole;
 import org.cloudfoundry.operations.CloudFoundryOperations;
+import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.doppler.DopplerClient;
+import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
+import org.cloudfoundry.reactor.ConnectionContext;
+import org.cloudfoundry.reactor.DefaultConnectionContext;
+import org.cloudfoundry.reactor.TokenProvider;
+import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
+import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
+import org.cloudfoundry.uaa.UaaClient;
 
 import reactor.core.publisher.Mono;
 
@@ -16,8 +27,39 @@ public class CloudFoundryAPI {
 	private CloudFoundryOperations ops;
 	private String uaa_origin;
 	
-	public CloudFoundryAPI(CloudFoundryOperations ops, String uaa_origin){
-		this.ops = ops;
+	public CloudFoundryAPI(String apiHost, 
+	String username, 
+	String password, 
+	String org, 
+	String space, 
+	String uaa_origin){
+
+		DefaultConnectionContext connectionContext = DefaultConnectionContext.builder()
+		.apiHost(apiHost)
+		.build();
+
+		PasswordGrantTokenProvider tokenProvider = PasswordGrantTokenProvider.builder()
+		.password(password)
+		.username(username)
+		.build();
+
+		this.ops = DefaultCloudFoundryOperations.builder()
+		.cloudFoundryClient(ReactorCloudFoundryClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.dopplerClient(ReactorDopplerClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.uaaClient(ReactorUaaClient.builder()
+			.connectionContext(connectionContext)
+			.tokenProvider(tokenProvider)
+			.build())
+		.organization(org)
+		.space(space)
+		.build();
+
 		this.uaa_origin = uaa_origin;
 	}
 	
@@ -26,13 +68,22 @@ public class CloudFoundryAPI {
 	//Is there a way to check if a user exists without creating it?
 	public boolean userAlreadyExists(String email) {
 
-		CreateUserRequest req = CreateUserRequest.builder().username(email).origin(uaa_origin).build();
+		CreateUserRequest req = CreateUserRequest
+			.builder()
+			.username(email)
+			.origin(uaa_origin)
+			//.password("Password")
+			.build();
 		try {
 			//Block obviously blocks. But also bubbles any exceptions into the current thread
-			ops.userAdmin().create(req).block();
+			ops.userAdmin().create(req).doOnError((Throwable e)->{
+				System.err.println("Error creating User " + email);
+				System.err.println(e.getMessage());
+			}).block();
 			return false;
 		}catch(IllegalArgumentException e) {
 			System.err.println(e.getMessage());
+			e.printStackTrace();
 			return true;
 		}
 	}
@@ -66,37 +117,33 @@ public class CloudFoundryAPI {
 		// TODO: Does the user get roles assigned for these spaces automatically?
 
 		System.out.println("Creating spaces prod and samples for org " + orgname + "...");
-		Mono.zip(
-		  this.createSpace(orgname, "prod"),
-		  this.createSpace(orgname, "samples")
-		).doOnError((Throwable e)->{
-			System.err.println("Error creating Space");
-			System.err.println(e.getMessage());
-		}).block();
+		this.createSpace(orgname, "prod");
+		this.createSpace(orgname, "samples");
+
 
 		System.out.println("Creating spaces dev and test for org " + orgname + "...");
-		Mono.zip(
-			this.createSpace(orgname, "dev"),
-		  this.createSpace(orgname, "test")
-		).doOnError((Throwable e)->{
-			System.err.println("Error creating Space");
-			System.err.println(e.getMessage());
-		}).block();
+		this.createSpace(orgname, "dev");
+		this.createSpace(orgname, "test");
 
-		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in all created spaces...");
-		Mono.zip(
-		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER),
-		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER),
-		this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER)
-		).doOnError((Throwable e)->{
-			System.err.println("Error creating Roles");
-			System.err.println(e.getMessage());
-		}).block();
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in dev...");
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "dev", SpaceRole.DEVELOPER);
+
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in test...");
+		this.setSpaceRole(email, orgname, "test", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "test", SpaceRole.DEVELOPER);
+	
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in prod...");
+	    this.setSpaceRole(email, orgname, "prod", SpaceRole.MANAGER);
+		this.setSpaceRole(email, orgname, "prod", SpaceRole.DEVELOPER);
+	
+
+		System.out.println("Creating roles MANAGER and DEVELOPER for user " + email + " in samples...");
+		this.setSpaceRole(email, orgname, "samples", SpaceRole.MANAGER);
+	    this.setSpaceRole(email, orgname, "samples", SpaceRole.DEVELOPER);
 
 
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()
@@ -105,16 +152,22 @@ public class CloudFoundryAPI {
 		return "https://firstlook.cap.explore.suse.dev";
 	}
 
-	private Mono<Void> createSpace(String org, String space) {
+	private Void createSpace(String org, String space) {
 		return ops.spaces().create(
 				CreateSpaceRequest.builder().name(space).organization(org).build()
-				);
+				).doOnError((Throwable e)->{
+					System.err.println("Error creating Space" + space);
+					System.err.println(e.getMessage());
+				}).block();
 	}
 
-	private Mono<Void> setSpaceRole(String username, String org, String space, SpaceRole role){
+	private Void setSpaceRole(String username, String org, String space, SpaceRole role){
 		return ops.userAdmin().setSpaceRole(
 			SetSpaceRoleRequest.builder().organizationName(org).spaceName(space).spaceRole(role).username(username).build()
-			);
+			).doOnError((Throwable e)->{
+				System.err.println("Error creating Role " +space+":"+ role.toString());
+				System.err.println(e.getMessage());
+			}).block();
 	}
 
 }
