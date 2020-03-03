@@ -20,6 +20,8 @@ import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.uaa.ReactorUaaClient;
 import org.cloudfoundry.uaa.UaaClient;
 
+import java.util.Random;
+import java.lang.StringBuilder;
 import reactor.core.publisher.Mono;
 
 
@@ -64,15 +66,23 @@ public class CloudFoundryAPI {
 	}
 	
 
+	private String buildPassword() {
+		Random rdm = new Random();
+
+		return rdm.ints(97,122).limit(10).collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+	}
+
 	//This seems to work but I don't like using an exception to get a real return...
 	//Is there a way to check if a user exists without creating it?
-	public boolean userAlreadyExists(String email) {
+	public String userAlreadyExists(String email) {
+
+		String password = buildPassword();
 
 		CreateUserRequest req = CreateUserRequest
 			.builder()
 			.username(email)
-			.origin(uaa_origin)
-			//.password("Password")
+			//.origin(uaa_origin)
+			.password(password)
 			.build();
 		try {
 			//Block obviously blocks. But also bubbles any exceptions into the current thread
@@ -80,11 +90,11 @@ public class CloudFoundryAPI {
 				System.err.println("Error creating User " + email);
 				System.err.println(e.getMessage());
 			}).block();
-			return false;
+			return password;
 		}catch(IllegalArgumentException e) {
 			System.err.println(e.getMessage());
 			e.printStackTrace();
-			return true;
+			return null;
 		}
 	}
 

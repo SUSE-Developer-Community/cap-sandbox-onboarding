@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
+
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,20 +37,13 @@ public class FormController {
 		try {
 			String email = form.getEmail();
 			
+			String password = client.userAlreadyExists(email);
 
-			if (client.userAlreadyExists(email)) {
+			if (password == null) {
 				return new RedirectView(onExists);
 			}
 
-			this.createEnvironmentInThread(client, email);
-
-// 			System.out.println("Building env for new user...");
-// 			String firstlookUrl = client.buildEnvironmentForUser(email);
-// 			System.out.println("Env for new user ready!");
-
-// //disabling until things are more stable so that we don"t always get a /failed
-// 			emailer.sendWelcomeEmail(email, firstlookUrl);
-
+			this.createEnvironmentInThread(client, email, password);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new RedirectView(onFailure);
@@ -58,7 +52,7 @@ public class FormController {
 		return new RedirectView(onSuccess);
 	}
 
-	private void createEnvironmentInThread(CloudFoundryAPI client, String email) {
+	private void createEnvironmentInThread(CloudFoundryAPI client, String email, String password) {
 
 		new Thread(){
 			public void run(){
@@ -68,8 +62,7 @@ public class FormController {
 				String firstlookUrl = client.buildEnvironmentForUser(email);
 				System.out.println("Env for new user ready!");
 
-	//disabling until things are more stable so that we don't always get a /failed
-				emailer.sendWelcomeEmail(email, firstlookUrl);
+				emailer.sendWelcomeEmail(email, password, firstlookUrl);
 				} catch(Exception e){
 					e.printStackTrace();
 				}

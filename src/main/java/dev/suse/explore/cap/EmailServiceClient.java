@@ -26,11 +26,11 @@ public class EmailServiceClient {
 		
 	}
 
-	public void sendWelcomeEmail(String email, String firstlook_url) {
+	public void sendWelcomeEmail(String email, String password, String firstlook_url) {
 
 		
 		Destination destination = new Destination().withToAddresses(email);
-		String data = "{\"stratos_url\":\""+stratos_url+"\",\"firstlook_url\":\""+firstlook_url+"\"}";
+		String data = "{\"stratos_url\":\""+stratos_url+"\", \"firstlook_url\":\""+firstlook_url+"\", \"password\":\""+password+"\"}";
 
 		SendTemplatedEmailRequest req = new SendTemplatedEmailRequest();
 				req.withDestination(destination);
