@@ -159,7 +159,7 @@ public class CloudFoundryAPI {
 		//PushApplicationRequest req = PushApplicationRequest.builder().application()
 
 		//TODO: personalize.
-		return "https://firstlook.cap.explore.suse.dev";
+		return "https://gettingstarted.cap.explore.suse.dev";
 	}
 
 	private Void createSpace(String org, String space) {
