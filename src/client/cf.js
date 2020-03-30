@@ -29,11 +29,28 @@ export default class CfApiClient {
     return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',json})
   }
 
-  async setOrgRole(orgname, user, rolename) {
-
+  async addOrgManager(guid, user_guid) {
+    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}/users/${user_guid}`, {method:'PUT'})
   }
 
-  async createSpace(org_name, space_name) {
+  // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
+  async createSpace(organization_guid, name) {
+
+    const json = {organization_guid, name}
+    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',json})
+  }
+
+  // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
+  async createSpaceForUser(organization_guid, name, user_guid) {
+
+    const json = {
+      organization_guid, 
+      name, 
+      developer_guids: [user_guid],
+      manager_guids: [user_guid],
+      auditor_guids: [user_guid]
+    }
+    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',json})
   }
 
   async setSpaceRole(org_name, space_name, user, rolename) {

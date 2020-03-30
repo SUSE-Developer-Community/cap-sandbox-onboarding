@@ -1,5 +1,9 @@
 import got from 'got'
 
+const {
+  performance
+} = require('perf_hooks');
+
 export default class CfHttpClient {
 
   constructor(api_url, uaa_url, username, password){
@@ -13,7 +17,9 @@ export default class CfHttpClient {
 
   async makeRequest(path, opts) {
     if(!this.auth) {
+      console.log('Logging in')
       await this.login()
+      console.log('Logged in')
     }
 
     const url = `${this.api_url}${path}`
@@ -22,8 +28,13 @@ export default class CfHttpClient {
     options.method = options.method || 'POST'
     if(!options.headers) options.headers={}
     options.headers.Authorization = this.buildAuth()
-    
-    return got(url, options).json()
+
+    console.log('Sending Req')
+    const ret = await got(url, options).json() //Need to add retry logic for login. Or add login refresh timer
+    console.log('Got Res')
+    return ret
+
+
   }
 
   buildAuth() {
