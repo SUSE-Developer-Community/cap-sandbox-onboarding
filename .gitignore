@@ -6,3 +6,6 @@ gradle/
 target/
 .settings/org.eclipse.jdt.core.prefs
 manifest.yml
+
+node_modules/
+dist/
