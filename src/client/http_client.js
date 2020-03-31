@@ -12,8 +12,9 @@ export default class CfHttpClient {
     this.password = password
     this.username = username
     this.auth = null
-  }
 
+    this.passwordInterval = setInterval(this.login.bind(this), 5 * 60 * 1000)
+  }
 
   async makeRequest(path, opts) {
     if(!this.auth) {
