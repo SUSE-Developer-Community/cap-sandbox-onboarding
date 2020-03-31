@@ -24,7 +24,7 @@ export const buildEnvironmentForUser = async (email) => {
 
   const org = await cf.createOrg(buildOrgNameFromEmail(email), QUOTA_NAME)
 
-  cf.addOrgManager(org.metadata.guid,user.metadata.guid)
+  await cf.addOrgManager(org.metadata.guid, user.metadata.guid)
 
   for (const space of ['dev', 'test', 'prod', 'samples']) {
     await cf.createSpaceForUser(org.metadata.guid, space, user.metadata.guid)

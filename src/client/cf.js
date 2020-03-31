@@ -47,8 +47,6 @@ export default class CfApiClient {
 
   async createOrg(name, quota) {
     const quota_definition = await this.getQuotaForName(quota)
-
-    console.log(quota_definition)
     const quota_definition_guid = quota_definition.metadata.guid
 
     const json = {name, quota_definition_guid}
@@ -57,7 +55,8 @@ export default class CfApiClient {
   }
 
   async addOrgManager(guid, user_guid) {
-    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}/users/${user_guid}`, {method:'PUT'})
+    await this.CfHttp.makeRequest(`/v2/organizations/${guid}/users/${user_guid}`, {method:'PUT'})
+    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}/managers/${user_guid}`, {method:'PUT'})
   }
 
   // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
