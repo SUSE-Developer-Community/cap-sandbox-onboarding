@@ -5,7 +5,34 @@ export default class CfApiClient {
     this.CfHttp = new CfHttp(api_url, uaa_url, username, password)
   }
 
-  async createUser(username, password) {
+  // Why does there have to be a random call that's different :(
+
+  // http://docs.cloudfoundry.org/api/uaa/version/4.24.0/index.html#create-4
+  // http://apidocs.cloudfoundry.org/12.39.0/users/creating_a_user.html
+  async createUser(email, password) {
+
+    const uaa_json = {
+      userName: email,
+      password: password,
+      name: {
+        familyName:email,
+        givenName:email
+      },
+      emails: [{
+        value: email,
+        primary: true
+      }],
+      verified: true
+    }
+  
+    const uaa_user = await this.CfHttp.makeUAARequest('/Users', {json:uaa_json, headers:{'Content-Type':'application/json'}})
+
+    const json = {
+      guid: uaa_user.id
+    }
+    const user = await this.CfHttp.makeRequest('/v2/users', {json})
+
+    return user
   }
 
   async getOrgForName(orgname) {

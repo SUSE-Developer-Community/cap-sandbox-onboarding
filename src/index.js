@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {checkIfUserExists, addUserByEmail} from './cf_api.js'
+import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
 import email from './email.js'
 
 const app = express()
@@ -22,7 +22,7 @@ app.post('/addUser', async (req, res) => {
       return
     }
 
-    const {stratos_url, getting_started_url, password} = await addUserByEmail(req.body.email)
+    const {stratos_url, getting_started_url, password} = await buildEnvironmentForUser(req.body.email)
     //await email.sendWelcomeEmail(req.body.email, stratos_url, getting_started_url, password)
 
     console.log('Would send email here')
