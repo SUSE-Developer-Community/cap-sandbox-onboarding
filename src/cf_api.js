@@ -48,7 +48,8 @@ export const buildEnvironmentForUser = async (email) => {
   cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./12factor.zip'), {
     name:'12Factor',
     disk_quota:256, 
-    memory_quota:64, 
+    memory_quota:64,
+    command: 'bundle exec ruby web.rb -p $PORT',
     buildpack: 'ruby_buildpack',
     host: `12Factor_${org_name}`
   })

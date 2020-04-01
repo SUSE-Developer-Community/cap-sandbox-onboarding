@@ -1,5 +1,6 @@
-import got from 'got'
 import axios from 'axios'
+import qs from 'qs';
+
 
 export default class CfHttpClient {
 
@@ -55,22 +56,23 @@ export default class CfHttpClient {
 
   async login(){
     console.log('Logging in')
-    const url = `${this.uaa_url}/oauth/token`;
     const options = {
-        method: "POST",
-        headers: {
-            Authorization: "Basic Y2Y6",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        form: {
-            grant_type: "password",
-            client_id: "cf",
-            username: this.username,
-            password: this.password
-        }
+      url: `${this.uaa_url}/oauth/token`,
+      method: "post",
+      headers: {
+        Authorization: "Basic Y2Y6",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      data: qs.stringify({
+        grant_type: "password",
+        client_id: "cf",
+        username: this.username,
+        password: this.password
+      })
     }
 
-    this.auth = await got(url, options).json()
+    const ret = await axios(options)
+    this.auth = ret.data
     console.log('Logged In!')
   }
 

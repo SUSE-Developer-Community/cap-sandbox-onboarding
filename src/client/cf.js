@@ -99,10 +99,9 @@ export default class CfApiClient {
       environment_json:{}
     }
 
-    console.log(JSON.stringify(app_json))
-    const app = await this.CfHttp.makeRequest('/v2/apps', {method:'POST',data: app_json})
+    const app = await this.CfHttp.makeRequest('/v2/apps', {method:'POST', data: app_json})
 
-    console.log(app)
+    
     // Upload bits
     // http://apidocs.cloudfoundry.org/12.39.0/apps/uploads_the_bits_for_an_app.html
     const form = new FormData()
@@ -124,21 +123,18 @@ export default class CfApiClient {
       }, function(err, out) {
         if(err) rej(err) 
         else res(out)
-      });
+      })
     })
 
       
     // Start App
     // 
-    const started = await this.CfHttp.makeRequest('/v2/apps/'+ app.metadata.guid, 
+    await this.CfHttp.makeRequest('/v2/apps/'+ app.metadata.guid, 
     {method:'PUT', data: {state: 'STARTED'}})
 
-    console.log(started)
 
     const domains = await this.CfHttp.makeRequest(`/v2/domains?q=name:cap.explore.suse.dev`, 
     {method:'GET'})
-
-    domains.resources[0].metadata.guid
 
     const route_data = {
       domain_guid: domains.resources[0].metadata.guid,

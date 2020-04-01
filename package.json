@@ -23,7 +23,7 @@
     "axios": "^0.19.2",
     "express": "^4.17.1",
     "form-data": "^3.0.0",
-    "got": "^10.7.0"
+    "qs": "^6.9.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
