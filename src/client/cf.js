@@ -27,12 +27,12 @@ export default class CfApiClient {
       verified: true
     }
   
-    const uaa_user = await this.CfHttp.makeUAARequest('/Users', {json:uaa_json, headers:{'Content-Type':'application/json'}})
+    const uaa_user = await this.CfHttp.makeUAARequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
 
     const json = {
       guid: uaa_user.id
     }
-    const user = await this.CfHttp.makeRequest('/v2/users', {json})
+    const user = await this.CfHttp.makeRequest('/v2/users', {data:json})
 
     return user
   }
@@ -53,7 +53,7 @@ export default class CfApiClient {
 
     const json = {name, quota_definition_guid}
 
-    return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',json})
+    return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',data:json})
   }
 
   async addOrgManager(guid, user_guid) {
@@ -65,7 +65,7 @@ export default class CfApiClient {
   async createSpace(organization_guid, name) {
 
     const json = {organization_guid, name}
-    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',json})
+    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',data:json})
   }
 
   // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
@@ -78,7 +78,7 @@ export default class CfApiClient {
       manager_guids: [user_guid],
       auditor_guids: [user_guid]
     }
-    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',json})
+    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',data:json})
   }
 
   async pushApp(space_guid, app_fs, {name, command, memory_quota, disk_quota, buildpack, host }) {
