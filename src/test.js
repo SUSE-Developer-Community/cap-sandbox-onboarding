@@ -1,7 +1,3 @@
-import {cf} from './client/index.js'
-var fs = require('fs');
+import {loadSampleApp} from './cf_api.js'
 
-setTimeout(()=>{
-
-
-},5000)
+loadSampleApp()

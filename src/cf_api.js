@@ -1,6 +1,9 @@
 import {cf} from './client/index.js' //Eventually move to separate lib
+import https from 'https'
+import fs from 'fs'
 
 const QUOTA_NAME = process.env.QUOTA_NAME
+
 
 
 //Assuming that if org exists, user does as well. 
@@ -42,7 +45,7 @@ export const buildEnvironmentForUser = async (email) => {
   const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user.metadata.guid)
   
 
-  cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./examples/12factor.zip'), {
+  cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./12factor.zip'), {
     name:'12Factor',
     disk_quota:256, 
     memory_quota:64, 
@@ -50,12 +53,25 @@ export const buildEnvironmentForUser = async (email) => {
     host: `12Factor_${org_name}`
   })
 
-
-
   return {
     email, 
     password,
     stratos_url: process.env.STRATOS_URL, 
     getting_started_url: process.env.GETTING_STARTED_URL
   }
+}
+
+export const loadSampleApp = ()=>{
+  return new Promise((resolve, reject)=>{
+    var file = fs.createWriteStream('./12factor.zip')
+
+    https.get('https://codeload.github.com/scf-samples/12factor/zip/scf', function(res) {
+      res.on('data', function(data) {
+        file.write(data)
+      }).on('end', function() {
+        file.end()
+        resolve()
+      }).on('error',reject)
+    });
+  })
 }

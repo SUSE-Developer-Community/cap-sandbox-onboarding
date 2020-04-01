@@ -66,7 +66,7 @@ export default class CfHttpClient {
             grant_type: "password",
             client_id: "cf",
             username: this.username,
-            password:this.password
+            password: this.password
         }
     }
 

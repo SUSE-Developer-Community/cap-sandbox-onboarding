@@ -1,10 +1,16 @@
 import express from 'express'
 
-import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
+import {checkIfUserExists, buildEnvironmentForUser, loadSampleApp} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
 const app = express()
 app.use(express.urlencoded({}))
+
+loadSampleApp().then(()=>{
+  console.log('Sample App loaded')
+}).catch((err)=>{
+  console.error(err)
+})
 
 
 app.post('/addUser', async (req, res) => {
