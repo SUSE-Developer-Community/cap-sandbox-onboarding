@@ -30,16 +30,25 @@ export const buildEnvironmentForUser = async (email) => {
 
   const user = await cf.createUser(email,password)
 
-  const org = await cf.createOrg(buildOrgNameFromEmail(email), QUOTA_NAME)
+  const org_name = buildOrgNameFromEmail(email)
+
+  const org = await cf.createOrg(org_name, QUOTA_NAME)
 
   await cf.addOrgManager(org.metadata.guid, user.metadata.guid)
 
-  for (const space of ['dev', 'test', 'prod', 'samples']) {
-    await cf.createSpaceForUser(org.metadata.guid, space, user.metadata.guid)
-  }
+  
+  await cf.createSpaceForUser(org.metadata.guid, 'dev', user.metadata.guid)
+  await cf.createSpaceForUser(org.metadata.guid, 'test', user.metadata.guid)
+  const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user.metadata.guid)
   
 
-  //cf.pushApp(org.metadata.guid, )
+  cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./examples/12factor.zip'), {
+    name:'12Factor',
+    disk_quota:256, 
+    memory_quota:64, 
+    buildpack: 'ruby_buildpack',
+    host: `12Factor_${org_name}`
+  })
 
 
 

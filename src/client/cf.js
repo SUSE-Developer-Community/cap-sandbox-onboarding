@@ -1,5 +1,7 @@
 import CfHttp from './http_client.js'
 
+var FormData = require('form-data');
+
 export default class CfApiClient {
   constructor (api_url, uaa_url, username, password) {
     this.CfHttp = new CfHttp(api_url, uaa_url, username, password)
@@ -79,12 +81,78 @@ export default class CfApiClient {
     return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',json})
   }
 
-  async setSpaceRole(org_name, space_name, user, rolename) {
+  async pushApp(space_guid, app_fs, {name, command, memory_quota, disk_quota, buildpack, host }) {
 
-  }
+    // Create App object
+    // http://apidocs.cloudfoundry.org/12.39.0/apps/creating_an_app.html
+    const app_json = {
+      space_guid, 
+      name, 
+      instances: 1,
+      diego: true,
+      state: "STOPPED",
+      command,
+      disk_quota,
+      memory: memory_quota,
+      buildpack,
+      health_check_http_endpoint:'/',
+      environment_json:{}
+    }
 
+    console.log(JSON.stringify(app_json))
+    const app = await this.CfHttp.makeRequest('/v2/apps', {method:'POST',data: app_json})
 
-  async pushApp(org_name, space_name, app_location) {
+    console.log(app)
+    // Upload bits
+    // http://apidocs.cloudfoundry.org/12.39.0/apps/uploads_the_bits_for_an_app.html
+    const form = new FormData()
+    form.append('async','false')
+    form.append('resources', '[]')
+    form.append('application', app_fs, {
+      filename:'application.zip', 
+      contentType:'application/zip'
+    })
+
+    // This is weird and annoying but works. Can't figure out how to get axios to send the right data...
+    await new Promise((res,rej)=>{
+      form.submit({
+        hostname: this.CfHttp.api_url.substr('8'),
+        path: `/v2/apps/${app.metadata.guid}/bits`,
+        headers: {'Authorization': this.CfHttp.buildAuth()},
+        method:'put',
+        protocol: 'https:'
+      }, function(err, out) {
+        if(err) rej(err) 
+        else res(out)
+      });
+    })
+
+      
+    // Start App
+    // 
+    const started = await this.CfHttp.makeRequest('/v2/apps/'+ app.metadata.guid, 
+    {method:'PUT', data: {state: 'STARTED'}})
+
+    console.log(started)
+
+    const domains = await this.CfHttp.makeRequest(`/v2/domains?q=name:cap.explore.suse.dev`, 
+    {method:'GET'})
+
+    domains.resources[0].metadata.guid
+
+    const route_data = {
+      domain_guid: domains.resources[0].metadata.guid,
+      space_guid,
+      host
+    }
+
+    // Add route 
+    const route = await this.CfHttp.makeRequest('/v2/routes', 
+    {method:'POST', data: route_data})
+
+    // Map route
+    await this.CfHttp.makeRequest(`/v2/routes/${route.metadata.guid}/apps/${app.metadata.guid}`, 
+    {method:'PUT'})
 
   }
   

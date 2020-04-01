@@ -1,8 +1,5 @@
 import got from 'got'
-
-const {
-  performance
-} = require('perf_hooks');
+import axios from 'axios'
 
 export default class CfHttpClient {
 
@@ -13,49 +10,43 @@ export default class CfHttpClient {
     this.username = username
     this.auth = null
 
-    this.passwordInterval = setInterval(this.login.bind(this), 5 * 60 * 1000)
+    this.login()
+    this.passwordInterval = setInterval(this.login.bind(this), 250 * 1000)
   }
+
 
   async makeRequest(path, opts) {
     if(!this.auth) {
-      console.log('Logging in')
-      await this.login()
-      console.log('Logged in')
+      throw 'Client Not Logged In (yet?)'
     }
 
     const url = `${this.api_url}${path}`
 
     const options = JSON.parse(JSON.stringify(opts || {}))
-    options.method = options.method || 'POST'
+    options.method = options.method || 'post'
     if(!options.headers) options.headers={}
     options.headers.Authorization = this.buildAuth()
 
-    console.log('Sending Req')
-    const ret = await got(url, options).json() //Need to add retry logic for login. Or add login refresh timer
-    console.log('Got Res')
-    return ret
-
-
+    options.url = url
+    const ret = await axios(options)
+    return ret.data
   }
 
   async makeUAARequest(path, opts) {
     if(!this.auth) {
-      console.log('Logging in')
-      await this.login()
-      console.log('Logged in')
+      throw 'Client Not Logged In (yet?)'
     }
 
     const url = `${this.uaa_url}${path}`
 
     const options = JSON.parse(JSON.stringify(opts || {}))
-    options.method = options.method || 'POST'
+    options.method = options.method || 'post'
     if(!options.headers) options.headers={}
     options.headers.Authorization = this.buildAuth()
-
-    console.log('Sending UAA Req')
-    const ret = await got(url, options).json() //Need to add retry logic for login. Or add login refresh timer
-    console.log('Got UAA Res')
-    return ret
+    
+    options.url = url
+    const ret = await axios(options)
+    return ret.data
   }
 
   buildAuth() {
@@ -63,6 +54,7 @@ export default class CfHttpClient {
   }
 
   async login(){
+    console.log('Logging in')
     const url = `${this.uaa_url}/oauth/token`;
     const options = {
         method: "POST",
@@ -79,6 +71,7 @@ export default class CfHttpClient {
     }
 
     this.auth = await got(url, options).json()
+    console.log('Logged In!')
   }
 
 }
