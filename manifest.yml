@@ -1,5 +1,6 @@
 applications:
 - name: onboarding-js
   buildpack: nodejs_buildpack
+  command: npm run start
   memory: 512M
   env:
