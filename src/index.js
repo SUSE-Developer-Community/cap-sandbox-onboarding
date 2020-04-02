@@ -6,16 +6,15 @@ import {sendWelcomeEmail} from './email.js'
 const app = express()
 app.use(express.urlencoded({}))
 
-loadSampleApp().then(()=>{
-  console.log('Sample App loaded')
-}).catch((err)=>{
-  console.error(err)
-})
+// loadSampleApp().then(()=>{
+//   console.log('Sample App loaded')
+// }).catch((err)=>{
+//   console.error(err)
+// })
 
 
 app.post('/addUser', async (req, res) => {
 
-  console.log(req.body)
   try{
     const exists = await checkIfUserExists(req.body.email)
 
@@ -29,7 +28,6 @@ app.post('/addUser', async (req, res) => {
     const {stratos_url, getting_started_url, password} = await buildEnvironmentForUser(req.body.email)
     await sendWelcomeEmail(req.body.email, stratos_url, getting_started_url, password)
 
-    console.log('Would send email here')
   } catch(e){
     console.log("Something broke? Redirecting to failure \n",e)
     //res.send(e) // Switch to this to get better roundtrip timing numbers

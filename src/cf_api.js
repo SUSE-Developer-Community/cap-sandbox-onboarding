@@ -62,17 +62,17 @@ export const buildEnvironmentForUser = async (email) => {
   }
 }
 
-export const loadSampleApp = ()=>{
-  return new Promise((resolve, reject)=>{
-    var file = fs.createWriteStream('./12factor.zip')
+// export const loadSampleApp = ()=>{
+//   return new Promise((resolve, reject)=>{
+//     var file = fs.createWriteStream('./12factor.zip')
 
-    https.get('https://codeload.github.com/scf-samples/12factor/zip/scf', function(res) {
-      res.on('data', function(data) {
-        file.write(data)
-      }).on('end', function() {
-        file.end()
-        resolve()
-      }).on('error',reject)
-    });
-  })
-}
+//     https.get('https://codeload.github.com/scf-samples/12factor/zip/scf', function(res) {
+//       res.on('data', function(data) {
+//         file.write(data)
+//       }).on('end', function() {
+//         file.end()
+//         resolve()
+//       }).on('error',reject)
+//     });
+//   })
+// }
