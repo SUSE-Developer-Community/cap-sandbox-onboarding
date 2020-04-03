@@ -1,0 +1,35 @@
+{
+  "name": "cap-sandbox-onboarding",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run build && node dist/test.js",
+    "start": "npm run build && node dist/index.js",
+    "build": "npm i && babel src/ -d dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SUSE-Developer-Community/cap-sandbox-onboarding.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SUSE-Developer-Community/cap-sandbox-onboarding/issues"
+  },
+  "homepage": "https://github.com/SUSE-Developer-Community/cap-sandbox-onboarding#readme",
+  "dependencies": {
+    "aws-sdk": "^2.648.0",
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "form-data": "^3.0.0",
+    "qs": "^6.9.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.9.0"
+  }
+}

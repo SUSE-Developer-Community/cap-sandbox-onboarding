@@ -1,17 +1,6 @@
 applications:
-- name: onboarding
-  buildpack: java_buildpack
-  memory: 1G
-  path: ./target/onboarding-0.1.0.jar
+- name: onboarding-js
+  buildpack: nodejs_buildpack
+  command: npm run start
+  memory: 512M
   env:
-    DEFAULT_ORG: 
-    DEFAULT_SPACE: 
-    CF_ADMIN_USER: 
-    CF_ADMIN_PASS: 
-    CF_API: 
-    SES_ACCESS_KEY: 
-    SES_SECRET_KEY: 
-    SES_REGION: 
-    SES_WELCOME_TEMPLATE: 
-    STRATOS_URL: 
-    UAA_ORIGIN: 
