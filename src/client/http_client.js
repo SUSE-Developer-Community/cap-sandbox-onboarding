@@ -1,5 +1,5 @@
 import axios from 'axios'
-import qs from 'qs';
+import qs from 'qs'
 
 
 export default class CfHttpClient {
@@ -58,14 +58,14 @@ export default class CfHttpClient {
     console.log('Logging in')
     const options = {
       url: `${this.uaa_url}/oauth/token`,
-      method: "post",
+      method: 'post',
       headers: {
-        Authorization: "Basic Y2Y6",
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        Authorization: 'Basic Y2Y6',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       },
       data: qs.stringify({
-        grant_type: "password",
-        client_id: "cf",
+        grant_type: 'password',
+        client_id: 'cf',
         username: this.username,
         password: this.password
       })

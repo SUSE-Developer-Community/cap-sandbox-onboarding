@@ -1,17 +1,10 @@
 import express from 'express'
 
-import {checkIfUserExists, buildEnvironmentForUser, loadSampleApp} from './cf_api.js'
+import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
 const app = express()
 app.use(express.urlencoded({}))
-
-// loadSampleApp().then(()=>{
-//   console.log('Sample App loaded')
-// }).catch((err)=>{
-//   console.error(err)
-// })
-
 
 app.post('/addUser', async (req, res) => {
 
@@ -21,7 +14,7 @@ app.post('/addUser', async (req, res) => {
     const exists = await checkIfUserExists(username)
 
     if (exists) {
-      console.log("Email already exists, redirecting to exists page")
+      console.log('Email already exists, redirecting to exists page')
       //res.send('EXISTS') // Switch to this to get better roundtrip timing numbers
       res.redirect(req.query.exists)
       return
@@ -31,7 +24,7 @@ app.post('/addUser', async (req, res) => {
     await sendWelcomeEmail(email, stratos_url, getting_started_url, password, firstName, lastName, username, role, country)
 
   } catch(e){
-    console.log("Something broke? Redirecting to failure \n",e)
+    console.log('Something broke? Redirecting to failure \n',e)
     //res.send(e) // Switch to this to get better roundtrip timing numbers
     res.redirect(req.query.fail)
     return
@@ -43,4 +36,4 @@ app.post('/addUser', async (req, res) => {
 
 
 
-app.listen(8080, () => console.log(`App listening`))
+app.listen(8080, () => console.log('App listening'))

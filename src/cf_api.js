@@ -12,7 +12,7 @@ export const checkIfUserExists = async (username)=>{
   return !!org
 }
 
-export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp("\\W",'g' ), "_"))
+export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
 
 
