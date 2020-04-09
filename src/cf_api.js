@@ -1,5 +1,4 @@
 import {cf} from './client/index.js' //Eventually move to separate lib
-import https from 'https'
 import fs from 'fs'
 
 const QUOTA_NAME = process.env.QUOTA_NAME
@@ -8,32 +7,20 @@ const QUOTA_NAME = process.env.QUOTA_NAME
 
 //Assuming that if org exists, user does as well. 
 // If not true, will need manual intervention anyways
-export const checkIfUserExists = async (email)=>{
-  const org = await cf.getOrgForName(buildOrgNameFromEmail(email))
+export const checkIfUserExists = async (username)=>{
+  const org = await cf.getOrgForName(buildOrgNameFromUsername(username))
   return !!org
 }
 
-export const buildOrgNameFromEmail =(email)=>(email.replace(new RegExp("\\W",'g' ), "_"))
+export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp("\\W",'g' ), "_"))
 
 
-const generatePassword = ()=>{
-  const all = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz23456789';
-  let password = '';
 
-  for (var index = 0; index < 12; index++) {
-      var character = Math.floor(Math.random() * all.length);
-      password += all.substring(character, character + 1);
-  }
+export const buildEnvironmentForUser = async (username, password) => {
 
-  return password;
-}
+  const user = await cf.createUser(username,password)
 
-export const buildEnvironmentForUser = async (email) => {
-  const password = generatePassword()
-
-  const user = await cf.createUser(email,password)
-
-  const org_name = buildOrgNameFromEmail(email)
+  const org_name = buildOrgNameFromUsername(username)
 
   const org = await cf.createOrg(org_name, QUOTA_NAME)
 
@@ -55,8 +42,7 @@ export const buildEnvironmentForUser = async (email) => {
   })
 
   return {
-    email, 
-    password,
+    email: username, 
     stratos_url: process.env.STRATOS_URL, 
     getting_started_url: process.env.GETTING_STARTED_URL
   }

@@ -15,8 +15,10 @@ app.use(express.urlencoded({}))
 
 app.post('/addUser', async (req, res) => {
 
+  const {email, firstName, lastName, username, password, role, country} = req.body
+
   try{
-    const exists = await checkIfUserExists(req.body.email)
+    const exists = await checkIfUserExists(username)
 
     if (exists) {
       console.log("Email already exists, redirecting to exists page")
@@ -25,8 +27,8 @@ app.post('/addUser', async (req, res) => {
       return
     }
 
-    const {stratos_url, getting_started_url, password} = await buildEnvironmentForUser(req.body.email)
-    await sendWelcomeEmail(req.body.email, stratos_url, getting_started_url, password)
+    const {stratos_url, getting_started_url} = await buildEnvironmentForUser(username, password)
+    await sendWelcomeEmail(email, stratos_url, getting_started_url, password, firstName, lastName, username, role, country)
 
   } catch(e){
     console.log("Something broke? Redirecting to failure \n",e)
