@@ -3,8 +3,17 @@ import express from 'express'
 import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
+import winston from  'winston'
+
+winston.level = process.env.LOG_LEVEL || 'debug'
+winston.add(new winston.transports.Console({
+  format: winston.format.simple(),
+  handleExceptions: true
+}))
+
+
 const app = express()
-app.use(express.urlencoded({}))
+app.use(express.urlencoded({extended:true}))
 
 app.post('/addUser', async (req, res) => {
 
@@ -14,14 +23,14 @@ app.post('/addUser', async (req, res) => {
     const exists = await checkIfUserExists(username)
 
     if (exists) {
-      console.log('Email already exists, redirecting to exists page')
+      winston.info('Email already exists, redirecting to exists page')
       //res.send('EXISTS') // Switch to this to get better roundtrip timing numbers
       res.redirect(req.query.exists)
       return
     }
 
     const {stratos_url, getting_started_url} = await buildEnvironmentForUser(username, password)
-    await sendWelcomeEmail(email, stratos_url, getting_started_url, password, firstName, lastName, username, role, country)
+    await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, username, role, country)
 
   } catch(e){
     console.log('Something broke? Redirecting to failure \n',e)
@@ -36,4 +45,4 @@ app.post('/addUser', async (req, res) => {
 
 
 
-app.listen(8080, () => console.log('App listening'))
+app.listen(8080, () => winston.info('App listening'))
