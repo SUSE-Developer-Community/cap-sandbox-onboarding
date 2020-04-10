@@ -17,10 +17,10 @@ app.use(express.urlencoded({extended:true}))
 
 app.post('/addUser', async (req, res) => {
 
-  const {email, firstName, lastName, username, password, role, country} = req.body
+  const {email, firstName, lastName, userName, password} = req.body
 
   try{
-    const exists = await checkIfUserExists(username)
+    const exists = await checkIfUserExists(userName)
 
     if (exists) {
       winston.info('Email already exists, redirecting to exists page')
@@ -29,8 +29,8 @@ app.post('/addUser', async (req, res) => {
       return
     }
 
-    const {stratos_url, getting_started_url} = await buildEnvironmentForUser(username, password)
-    await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, username, role, country)
+    const {stratos_url, getting_started_url} = await buildEnvironmentForUser(userName, password)
+    await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, userName)
 
   } catch(e){
     winston.warn('Something broke? Redirecting to failure \n',e)

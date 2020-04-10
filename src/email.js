@@ -13,8 +13,8 @@ const sender_email = process.env.SES_SENDER
 const SES = new AWS.SES({apiVersion: '2010-12-01'})
 
 
-export const  sendWelcomeEmail = async (email, stratos_url, getting_started_url, firstName, lastName, username, role, country) => {
-  logger.debug('Sending Email with: ', [email, stratos_url, getting_started_url, firstName, lastName, username, role, country])
+export const  sendWelcomeEmail = async (email, stratos_url, getting_started_url, firstName, lastName, username) => {
+  logger.debug('Sending Email with: ', [email, stratos_url, getting_started_url, firstName, lastName, username])
 
   try{
 
