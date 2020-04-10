@@ -33,7 +33,7 @@ app.post('/addUser', async (req, res) => {
     await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, username, role, country)
 
   } catch(e){
-    console.log('Something broke? Redirecting to failure \n',e)
+    winston.warn('Something broke? Redirecting to failure \n',e)
     //res.send(e) // Switch to this to get better roundtrip timing numbers
     res.redirect(req.query.fail)
     return
