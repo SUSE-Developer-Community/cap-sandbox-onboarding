@@ -18,7 +18,7 @@ export const buildEnvironmentForUser = async (username, password, email, familyN
 
   const user = await cf.createUser(username, email, password, familyName, givenName )
 
-  const org_name = buildOrgNameFromUsername(username)
+  const org_name = buildOrgNameFromEmail(email)
 
   const org = await cf.createOrg(org_name, QUOTA_NAME)
 
