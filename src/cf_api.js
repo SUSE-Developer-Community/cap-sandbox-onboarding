@@ -15,23 +15,9 @@ export const checkIfUserExists = async (email)=>{
 
 export const buildOrgNameFromEmail =(email)=>(email.replace(new RegExp("\\W",'g' ), "_"))
 
+export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
 
-const generatePassword = ()=>{
-  const all = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz23456789';
-  let password = '';
-
-  for (var index = 0; index < 12; index++) {
-      var character = Math.floor(Math.random() * all.length);
-      password += all.substring(character, character + 1);
-  }
-
-  return password;
-}
-
-export const buildEnvironmentForUser = async (email) => {
-  const password = generatePassword()
-
-  const user = await cf.createUser(email,password)
+  const user = await cf.createUser(username, email, password, familyName, givenName )
 
   const org_name = buildOrgNameFromEmail(email)
 
