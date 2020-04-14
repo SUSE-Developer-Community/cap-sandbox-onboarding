@@ -13,10 +13,10 @@ const sender_email = process.env.SES_SENDER
 const SES = new AWS.SES({apiVersion: '2010-12-01'})
 
 
-export const  sendWelcomeEmail = async (email) => {
+export const  sendWelcomeEmail = async (email, firstName, lastName, userName) => {
 
   try{
-    const config = buildConfig(email)
+    const config = buildConfig(email, firstName)
     await SES.sendTemplatedEmail(config).promise()
 
   } catch (e) {
@@ -27,7 +27,7 @@ export const  sendWelcomeEmail = async (email) => {
 
 
 // https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/ses-examples-sending-email.html
-const buildConfig = (to_address)=>(
+const buildConfig = (to_address, first_name)=>(
   {
     Destination: {
       ToAddresses: [
@@ -36,7 +36,7 @@ const buildConfig = (to_address)=>(
     },
     Source: sender_email,
     Template: template_name,
-    TemplateData: JSON.stringify({stratos_url:'https://stratos.cap.explore.suse.dev', firstlook_url:'https://gettingstarted.cap.explore.suse.dev'}),
+    TemplateData: JSON.stringify({first_name}),
     ReplyToAddresses: [
       'NO_REPLY@explore.suse.dev'
     ]
