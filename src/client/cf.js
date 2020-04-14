@@ -1,6 +1,6 @@
 import CfHttp from './http_client.js'
 
-var FormData = require('form-data');
+var FormData = require('form-data')
 
 export default class CfApiClient {
   constructor (api_url, uaa_url, username, password) {
@@ -90,7 +90,7 @@ export default class CfApiClient {
       name, 
       instances: 1,
       diego: true,
-      state: "STOPPED",
+      state: 'STOPPED',
       command,
       disk_quota,
       memory: memory_quota,
@@ -130,11 +130,11 @@ export default class CfApiClient {
     // Start App
     // 
     await this.CfHttp.makeRequest('/v2/apps/'+ app.metadata.guid, 
-    {method:'PUT', data: {state: 'STARTED'}})
+      {method:'PUT', data: {state: 'STARTED'}})
 
 
-    const domains = await this.CfHttp.makeRequest(`/v2/domains?q=name:cap.explore.suse.dev`, 
-    {method:'GET'})
+    const domains = await this.CfHttp.makeRequest('/v2/domains?q=name:cap.explore.suse.dev', 
+      {method:'GET'})
 
     const route_data = {
       domain_guid: domains.resources[0].metadata.guid,
@@ -144,11 +144,11 @@ export default class CfApiClient {
 
     // Add route 
     const route = await this.CfHttp.makeRequest('/v2/routes', 
-    {method:'POST', data: route_data})
+      {method:'POST', data: route_data})
 
     // Map route
     await this.CfHttp.makeRequest(`/v2/routes/${route.metadata.guid}/apps/${app.metadata.guid}`, 
-    {method:'PUT'})
+      {method:'PUT'})
 
   }
   

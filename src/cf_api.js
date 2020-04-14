@@ -1,5 +1,4 @@
 import {cf} from './client/index.js' //Eventually move to separate lib
-import https from 'https'
 import fs from 'fs'
 
 const QUOTA_NAME = process.env.QUOTA_NAME
@@ -8,18 +7,18 @@ const QUOTA_NAME = process.env.QUOTA_NAME
 
 //Assuming that if org exists, user does as well. 
 // If not true, will need manual intervention anyways
-export const checkIfUserExists = async (email)=>{
-  const org = await cf.getOrgForName(buildOrgNameFromEmail(email))
+export const checkIfUserExists = async (username)=>{
+  const org = await cf.getOrgForName(buildOrgNameFromUsername(username))
   return !!org
 }
 
-export const buildOrgNameFromEmail =(email)=>(email.replace(new RegExp("\\W",'g' ), "_"))
+export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
 export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
 
   const user = await cf.createUser(username, email, password, familyName, givenName )
 
-  const org_name = buildOrgNameFromEmail(email)
+  const org_name = buildOrgNameFromUsername(username)
 
   const org = await cf.createOrg(org_name, QUOTA_NAME)
 
