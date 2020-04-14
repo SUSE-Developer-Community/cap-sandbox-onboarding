@@ -39,13 +39,6 @@ export const buildEnvironmentForUser = async (username, password, email, familyN
     buildpack: 'ruby_buildpack',
     host: `12Factor_${org_name}`
   })
-
-  return {
-    email, 
-    password,
-    stratos_url: process.env.STRATOS_URL, 
-    getting_started_url: process.env.GETTING_STARTED_URL
-  }
 }
 
 // export const loadSampleApp = ()=>{
