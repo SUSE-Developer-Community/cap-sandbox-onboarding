@@ -8,6 +8,6 @@ setTimeout(()=>{
     memory_quota:64,
     command: 'bundle exec ruby web.rb -p $PORT',
     buildpack: 'ruby_buildpack',
-    host: `12Factor_test`
+    host: '12Factor_test'
   })
 }, 5000)

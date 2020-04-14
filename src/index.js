@@ -1,35 +1,39 @@
 import express from 'express'
 
-import {checkIfUserExists, buildEnvironmentForUser, loadSampleApp} from './cf_api.js'
+import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
+import winston from  'winston'
+
+winston.level = process.env.LOG_LEVEL || 'debug'
+winston.add(new winston.transports.Console({
+  format: winston.format.simple(),
+  handleExceptions: true
+}))
+
+
 const app = express()
-app.use(express.urlencoded({}))
-
-// loadSampleApp().then(()=>{
-//   console.log('Sample App loaded')
-// }).catch((err)=>{
-//   console.error(err)
-// })
-
+app.use(express.urlencoded({extended:true}))
 
 app.post('/addUser', async (req, res) => {
 
+  const {email, firstName, lastName, userName, password} = req.body
+
   try{
-    const exists = await checkIfUserExists(req.body.email)
+    const exists = await checkIfUserExists(userName)
 
     if (exists) {
-      console.log("Email already exists, redirecting to exists page")
+      winston.info('Email already exists, redirecting to exists page')
       //res.send('EXISTS') // Switch to this to get better roundtrip timing numbers
       res.redirect(req.query.exists)
       return
     }
 
-    const {stratos_url, getting_started_url, password} = await buildEnvironmentForUser(req.body.email)
-    await sendWelcomeEmail(req.body.email, stratos_url, getting_started_url, password)
+    const {stratos_url, getting_started_url} = await buildEnvironmentForUser(userName, password)
+    await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, userName)
 
   } catch(e){
-    console.log("Something broke? Redirecting to failure \n",e)
+    winston.warn('Something broke? Redirecting to failure \n',e)
     //res.send(e) // Switch to this to get better roundtrip timing numbers
     res.redirect(req.query.fail)
     return
@@ -41,4 +45,4 @@ app.post('/addUser', async (req, res) => {
 
 
 
-app.listen(8080, () => console.log(`App listening`))
+app.listen(8080, () => winston.info('App listening'))
