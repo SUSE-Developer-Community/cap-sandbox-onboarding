@@ -11,14 +11,14 @@ export default class CfApiClient {
 
   // http://docs.cloudfoundry.org/api/uaa/version/4.24.0/index.html#create-4
   // http://apidocs.cloudfoundry.org/12.39.0/users/creating_a_user.html
-  async createUser(email, password) {
+  async createUser(userName, email, password, familyName, givenName) {
 
     const uaa_json = {
-      userName: email,
+      userName,
       password: password,
       name: {
-        familyName:email,
-        givenName:email
+        familyName,
+        givenName
       },
       emails: [{
         value: email,

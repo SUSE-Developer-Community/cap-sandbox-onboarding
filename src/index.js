@@ -29,8 +29,8 @@ app.post('/addUser', async (req, res) => {
       return
     }
 
-    const {stratos_url, getting_started_url} = await buildEnvironmentForUser(userName, password)
-    await sendWelcomeEmail(email, stratos_url, getting_started_url, firstName, lastName, userName)
+    await buildEnvironmentForUser(userName, password, email, lastName, firstName)
+    await sendWelcomeEmail(email, firstName, lastName, userName)
 
   } catch(e){
     winston.warn('Something broke? Redirecting to failure \n',e)

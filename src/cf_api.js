@@ -14,11 +14,9 @@ export const checkIfUserExists = async (username)=>{
 
 export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
+export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
 
-
-export const buildEnvironmentForUser = async (username, password) => {
-
-  const user = await cf.createUser(username,password)
+  const user = await cf.createUser(username, email, password, familyName, givenName )
 
   const org_name = buildOrgNameFromUsername(username)
 
@@ -40,12 +38,6 @@ export const buildEnvironmentForUser = async (username, password) => {
     buildpack: 'ruby_buildpack',
     host: `12Factor_${org_name}`
   })
-
-  return {
-    email: username, 
-    stratos_url: process.env.STRATOS_URL, 
-    getting_started_url: process.env.GETTING_STARTED_URL
-  }
 }
 
 // export const loadSampleApp = ()=>{
