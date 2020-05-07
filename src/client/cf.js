@@ -37,6 +37,16 @@ export default class CfApiClient {
     return user
   }
 
+  async changePassword(username, password){
+    //TODO finish
+    throw new Error('Unfinished changePassword in client/cf.js')
+  }
+  
+  async deleteUser(username, password){
+    //TODO finish
+    throw new Error('Unfinished deleteUser in client/cf.js')
+  }
+
   async getOrgForName(orgname) {
     const org_list = await this.CfHttp.makeRequest('/v2/organizations?q=name:' + orgname, {method:'GET'})
     return org_list.resources[0]
