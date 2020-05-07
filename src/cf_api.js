@@ -14,6 +14,14 @@ export const checkIfUserExists = async (username)=>{
 
 export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
+export const changeUserPassword = async (username, password)=>{
+  return await cf.changePassword(username, password)
+}
+
+export const deleteUser = async (username)=>{
+  return await cf.deleteUser(username)
+}
+
 export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
 
   const user = await cf.createUser(username, email, password, familyName, givenName )
