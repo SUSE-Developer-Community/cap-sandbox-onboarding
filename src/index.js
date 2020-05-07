@@ -1,7 +1,8 @@
 import express from 'express'
 
-import {checkIfUserExists, buildEnvironmentForUser} from './cf_api.js'
+import {checkIfUserExists, buildEnvironmentForUser, resetUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
+import {verifySignature} from './crypto.js'
 
 import winston from  'winston'
 
@@ -43,6 +44,30 @@ app.post('/addUser', async (req, res) => {
   res.redirect(req.query.success || '/?state=success')
 })
 
+app.post('/changePassword', async (req, res) => {
 
+  const {email, userName, password: newPassword, signature} = req.body
+
+  if( !verifySignature(email+'|'+userName, signature)) {
+    res.redirect(req.query.fail)
+    return 
+  }
+
+  await resetUserPassword(userName, newPassword)
+  res.redirect(req.query.success)
+})
+
+app.post('/deleteUser', async (req, res) => {
+
+  const {email, userName, signature} = req.body
+
+  if( !verifySignature(email+'|'+userName, signature)) {
+    res.redirect(req.query.fail)
+    return 
+  }
+
+  await deleteUser(userName)
+  res.redirect(req.query.success)
+})
 
 app.listen(8080, () => winston.info('App listening'))
