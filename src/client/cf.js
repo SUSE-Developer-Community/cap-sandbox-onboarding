@@ -37,15 +37,35 @@ export default class CfApiClient {
     return user
   }
 
-  
-  async changePassword(username, password){
-    //TODO finish
-    throw new Error('Unfinished changePassword in client/cf.js')
+  async getUserForUsername(username){
+    
+    const users = await this.CfHttp.makeUAARequest('/Users?filter='
+    +encodeURIComponent(`Username%22eq%22"${username}"&attributes=id`))
+
+    if(!users.resources[0]){
+      throw new Error('User does not exist')
+    }
+
+    return users.resources[0]
   }
   
-  async deleteUser(username, password){
-    //TODO finish
-    throw new Error('Unfinished deleteUser in client/cf.js')
+  async changePassword(username, password){
+
+    const {id} = await this.getUserForUsername(username)
+
+    const data = {
+      password
+    }
+
+    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {data, headers:{'Content-Type':'application/json'}})
+
+  }
+  
+  async deleteUAAUser(username){
+
+    const {id} = await this.getUserForUsername(username)
+
+    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {method:'DELETE'})
   }
 
   async getOrgForName(orgname) {
@@ -65,6 +85,13 @@ export default class CfApiClient {
     const json = {name, quota_definition_guid}
 
     return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',data:json})
+  }
+
+  async deleteOrg(name) {
+    const org_definition = await this.getOrgForName(name)
+    const guid = org_definition.metadata.guid
+
+    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}`, {method:'DELETE'})
   }
 
   async addOrgManager(guid, user_guid) {
