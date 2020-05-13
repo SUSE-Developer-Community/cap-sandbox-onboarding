@@ -1,6 +1,7 @@
 applications:
 - name: onboarding-js
-  buildpack: nodejs_buildpack
-  command: npm run start
+  buildpacks: 
+  - https://github.com/agracey/buildpack-minimal-npm-build.git
+  - https://github.com/agracey/buildpack-minimal-node-runner.git
   memory: 512M
   env:

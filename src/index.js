@@ -16,6 +16,18 @@ winston.add(new winston.transports.Console({
 const app = express()
 app.use(express.urlencoded({extended:true}))
 
+app.use((req, res, next)=>{
+  if(verifySignature(req.body.email, req.body.emailSignature)) {
+    next()
+  } else {
+    res.send(401).send(JSON.stringify({status:401, message:'Email and signature did not match'}))
+  }
+})
+
+app.post('/test', (req, res)=>{
+  res.send(req.body) 
+})
+
 app.post('/addUser', async (req, res) => {
 
   const {email, firstName, lastName, userName, password} = req.body
