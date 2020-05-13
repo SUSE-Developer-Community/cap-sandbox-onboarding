@@ -37,7 +37,7 @@ export default class CfApiClient {
     return user
   }
 
-  async getUserForUsername(username){
+  async getUserForUsername(username) {
     
     const users = await this.CfHttp.makeUAARequest('/Users?filter='
     +encodeURIComponent(`Username%22eq%22"${username}"&attributes=id`))
@@ -48,23 +48,29 @@ export default class CfApiClient {
 
     return users.resources[0]
   }
+
+  async findUsers(filters) {
+
+    const filterQ = filters.reduce((acc,curr) => (
+      acc.map(curr.key, '%22', curr.comparison||'eq' ,'%22', '"',curr.value,'"')
+    ),'')
+
+    const ret = await this.CfHttp.makeUAARequest('/Users?filter='
+    + encodeURIComponent(`${filterQ}`) 
+    + '&attributes=id')
+
+    return ret.resources
+  }
   
-  async changePassword(username, password){
-
-    const {id} = await this.getUserForUsername(username)
-
+  async changePassword(id, password) {
     const data = {
       password
     }
 
     return await this.CfHttp.makeUAARequest(`/Users/${id}`, {data, headers:{'Content-Type':'application/json'}})
-
   }
   
-  async deleteUAAUser(username){
-
-    const {id} = await this.getUserForUsername(username)
-
+  async deleteUAAUser(id){
     return await this.CfHttp.makeUAARequest(`/Users/${id}`, {method:'DELETE'})
   }
 

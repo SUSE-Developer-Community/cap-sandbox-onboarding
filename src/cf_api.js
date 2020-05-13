@@ -4,38 +4,46 @@ import fs from 'fs'
 const QUOTA_NAME = process.env.QUOTA_NAME
 
 
-
-//Assuming that if org exists, user does as well. 
-// If not true, will need manual intervention anyways
 export const checkIfUserExists = async (username)=>{
-  const org = await cf.getOrgForName(buildOrgNameFromUsername(username))
-  return !!org
+  try{
+    cf.getUserForUsername(username)
+    return false
+  }catch(e){
+    return true
+  }
+}
+
+export const createUser = async (username, email, password, familyName, givenName) => {
+  return await cf.createUser(username, email, password, familyName, givenName)
 }
 
 export const changeUserPassword = async (username, password)=>{
-  return await cf.changePassword(username, password)
+  const {id} = await cf.getUserForUsername(username, password)
+  return await cf.changePassword(id, password)
 }
 
-export const deleteUser = async (username)=>{
-  return await cf.deleteUser(username)
+export const deleteUser = async (username) => {
+  const {id} = await cf.getUserForUsername(username)
+  return await cf.deleteUAAUser(id) //TODO: CF as well?
 }
 
-export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
+export const listUsersWithEmail = async (email)=> {
+  return await cf.findUsers([{key:'email',value:email}])
+} 
 
-export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
+export const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
-  const user = await cf.createUser(username, email, password, familyName, givenName )
 
-  const org_name = buildOrgNameFromUsername(username)
+export const buildEnvironmentForUser = async (user_id, org_name) => {
 
   const org = await cf.createOrg(org_name, QUOTA_NAME)
 
-  await cf.addOrgManager(org.metadata.guid, user.metadata.guid)
+  await cf.addOrgManager(org.metadata.guid, user_id)
 
   
-  await cf.createSpaceForUser(org.metadata.guid, 'dev', user.metadata.guid)
-  await cf.createSpaceForUser(org.metadata.guid, 'test', user.metadata.guid)
-  const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user.metadata.guid)
+  await cf.createSpaceForUser(org.metadata.guid, 'dev', user_id)
+  await cf.createSpaceForUser(org.metadata.guid, 'test', user_id)
+  const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user_id)
   
 
   cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./12factor.zip'), {

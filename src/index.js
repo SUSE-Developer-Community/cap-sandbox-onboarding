@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {checkIfUserExists, buildEnvironmentForUser, resetUserPassword, deleteUser} from './cf_api.js'
+import {createUser, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, resetUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 import {verifySignature} from './crypto.js'
 
@@ -12,15 +12,22 @@ winston.add(new winston.transports.Console({
   handleExceptions: true
 }))
 
+const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W','g' ), '_'))
+
+
 
 const app = express()
 app.use(express.urlencoded({extended:true}))
 
 app.use((req, res, next)=>{
+  //TODO make this whatever verification we need. For now, using token.
+
+
+
   if(verifySignature(req.body.email, req.body.emailSignature)) {
     next()
   } else {
-    res.send(401).send(JSON.stringify({status:401, message:'Email and signature did not match'}))
+    next({status:401, message:'Email and signature did not match'})
   }
 })
 
@@ -36,24 +43,24 @@ app.post('/addUser', async (req, res) => {
     const exists = await checkIfUserExists(userName)
 
     if (exists) {
-      winston.info('Email already exists, redirecting to exists page')
-      //res.send('EXISTS') // Switch to this to get better roundtrip timing numbers
-      res.redirect(req.query.exists)
+      winston.info('User already exists')
+      res.send(409).send({status:409, message:'User already exists'})
       return
     }
 
-    await buildEnvironmentForUser(userName, password, email, lastName, firstName)
+
+    const user = await createUser(userName, password, email, lastName, firstName)
+    await buildEnvironmentForUser(user.metadata.guid, buildOrgNameFromUsername(userName))
+
     await sendWelcomeEmail(email, firstName, lastName, userName)
 
   } catch(e){
     winston.warn('Something broke? Redirecting to failure \n',e)
-    //res.send(e) // Switch to this to get better roundtrip timing numbers
-    res.redirect(req.query.fail)
+    res.send(500).send(e)
     return
   }
 
-  //res.send('SUCCESS') // Switch to this to get better roundtrip timing numbers
-  res.redirect(req.query.success || '/?state=success')
+  res.send(204)
 })
 
 app.post('/changePassword', async (req, res) => {
@@ -80,6 +87,13 @@ app.post('/deleteUser', async (req, res) => {
 
   await deleteUser(userName)
   res.redirect(req.query.success)
+})
+
+app.get('/user/:email', async (req, res) => {
+  const {email} = req.params
+
+  const users = await listUsersWithEmail(email)
+  res.send(users)
 })
 
 app.listen(8080, () => winston.info('App listening'))
