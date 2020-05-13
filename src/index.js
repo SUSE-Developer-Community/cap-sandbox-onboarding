@@ -20,14 +20,12 @@ const app = express()
 app.use(express.urlencoded({extended:true}))
 
 app.use((req, res, next)=>{
-  //TODO make this whatever verification we need. For now, using token.
-
-
-
-  if(verifySignature(req.body.email, req.body.emailSignature)) {
+  if(req.headers.authorization == 'Basic dGVzdDp0ZXN0cGFzc3dvcmQ='){
     next()
-  } else {
-    next({status:401, message:'Email and signature did not match'})
+  } 
+  else {
+    winston.error('Failed login')
+    res.send(403)
   }
 })
 
@@ -92,8 +90,13 @@ app.post('/deleteUser', async (req, res) => {
 app.get('/user/:email', async (req, res) => {
   const {email} = req.params
 
-  const users = await listUsersWithEmail(email)
-  res.send(users)
+  try {
+    const users = await listUsersWithEmail(email)
+
+    res.send(users)
+  }catch (e){
+    res.send(e)
+  }
 })
 
 app.listen(8080, () => winston.info('App listening'))

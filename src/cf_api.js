@@ -28,7 +28,14 @@ export const deleteUser = async (username) => {
 }
 
 export const listUsersWithEmail = async (email)=> {
-  return await cf.findUsers([{key:'email',value:email}])
+  const users = await cf.findUsers([{key:'Email',value:email}])
+  return users.map((u)=>({
+    userName: u.userName, 
+    lastLogonTime: u.lastLogonTime, 
+    passwordLastModified: u.passwordLastModified,
+    created: u.created,
+    active: u.active
+  }))
 } 
 
 export const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W','g' ), '_'))
