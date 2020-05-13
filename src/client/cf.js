@@ -50,7 +50,7 @@ export default class CfApiClient {
         '"' ,
         curr.value ,
         '"')
-    )).join('&')
+    )).join(' and ')
 
     const ret = await this.CfHttp.makeUAARequest('/Users?filter='
     + encodeURIComponent(filterQ),{method:'GET'} )

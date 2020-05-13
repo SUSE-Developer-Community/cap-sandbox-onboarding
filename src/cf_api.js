@@ -22,9 +22,13 @@ export const changeUserPassword = async (username, password)=>{
   return await cf.changePassword(id, password)
 }
 
-export const deleteUser = async (username) => {
-  const {id} = await cf.getUserForUsername(username)
-  return await cf.deleteUAAUser(id) //TODO: CF as well?
+export const deleteUser = async (email, username) => {
+  const users = await cf.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
+  
+  if(users.length==1){
+    await cf.deleteUAAUser(users[0].id) //TODO: CF Org as well?
+  }
+  return 
 }
 
 export const listUsersWithEmail = async (email)=> {

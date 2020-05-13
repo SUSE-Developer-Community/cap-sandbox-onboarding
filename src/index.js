@@ -74,17 +74,12 @@ app.post('/changePassword', async (req, res) => {
   res.redirect(req.query.success)
 })
 
-app.post('/deleteUser', async (req, res) => {
+app.delete('/user/:email/:userName', async (req, res) => {
 
-  const {email, userName, signature} = req.body
+  const {email, userName} = req.params
 
-  if( !verifySignature(email+'|'+userName, signature)) {
-    res.redirect(req.query.fail)
-    return 
-  }
-
-  await deleteUser(userName)
-  res.redirect(req.query.success)
+  await deleteUser(email, userName)
+  res.send(204)
 })
 
 app.get('/user/:email', async (req, res) => {
