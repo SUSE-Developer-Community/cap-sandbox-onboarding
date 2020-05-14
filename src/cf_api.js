@@ -17,9 +17,12 @@ export const createUser = async (username, email, password, familyName, givenNam
   return await cf.createUser(username, email, password, familyName, givenName)
 }
 
-export const changeUserPassword = async (username, password)=>{
-  const {id} = await cf.getUserForUsername(username, password)
-  return await cf.changePassword(id, password)
+export const changeUserPassword = async (email, username, password)=>{
+  const users = await cf.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
+  
+  if(users.length==1){
+    await cf.changePassword(users[0].id, password)
+  } else { throw new Error('not_found') }
 }
 
 export const deleteUser = async (email, username) => {
@@ -27,8 +30,7 @@ export const deleteUser = async (email, username) => {
   
   if(users.length==1){
     await cf.deleteUAAUser(users[0].id) //TODO: CF Org as well?
-  }
-  return 
+  } else { throw new Error('not_found') }
 }
 
 export const listUsersWithEmail = async (email)=> {

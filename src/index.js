@@ -2,7 +2,6 @@ import express from 'express'
 
 import {createUser, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, resetUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
-import {verifySignature} from './crypto.js'
 
 import winston from  'winston'
 
@@ -29,13 +28,10 @@ app.use((req, res, next)=>{
   }
 })
 
-app.post('/test', (req, res)=>{
-  res.send(req.body) 
-})
+app.post('/user/:email/:userName', async (req, res) => {
+  const {email, userName} = req.params
 
-app.post('/addUser', async (req, res) => {
-
-  const {email, firstName, lastName, userName, password} = req.body
+  const {firstName, lastName, password} = req.body
 
   try{
     const exists = await checkIfUserExists(userName)
@@ -61,16 +57,14 @@ app.post('/addUser', async (req, res) => {
   res.send(204)
 })
 
-app.post('/changePassword', async (req, res) => {
+app.put('/user/:email/:userName/password', async (req, res) => {
 
-  const {email, userName, password: newPassword, signature} = req.body
+  const {email, userName} = req.params
 
-  if( !verifySignature(email+'|'+userName, signature)) {
-    res.redirect(req.query.fail)
-    return 
-  }
+  const {password: newPassword} = req.body
 
-  await resetUserPassword(userName, newPassword)
+
+  await resetUserPassword(email, userName, newPassword)
   res.redirect(req.query.success)
 })
 
