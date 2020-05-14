@@ -1,36 +1,18 @@
-import CfHttp from './http_client.js'
-
 var FormData = require('form-data')
 
 export default class CfApiClient {
-  constructor (api_url, uaa_url, username, password) {
-    this.CfHttp = new CfHttp(api_url, uaa_url, username, password)
+  constructor (http_client) {
+    this.CfHttp = http_client
   }
 
   // Why does there have to be a random call that's different :(
 
   // http://docs.cloudfoundry.org/api/uaa/version/4.24.0/index.html#create-4
   // http://apidocs.cloudfoundry.org/12.39.0/users/creating_a_user.html
-  async createUser(userName, email, password, familyName, givenName) {
-
-    const uaa_json = {
-      userName,
-      password: password,
-      name: {
-        familyName,
-        givenName
-      },
-      emails: [{
-        value: email,
-        primary: true
-      }],
-      verified: true
-    }
-  
-    const uaa_user = await this.CfHttp.makeUAARequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
+  async createUser(uaa_user_id) {
 
     const json = {
-      guid: uaa_user.id
+      guid: uaa_user_id
     }
     const user = await this.CfHttp.makeRequest('/v2/users', {data:json})
 
