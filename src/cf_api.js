@@ -23,7 +23,11 @@ export const changeUserPassword = async (email, username, password)=>{
   const users = await uaa.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
   
   if(users.length==1){
-    await uaa.changePassword(users[0].id, password)
+    try{
+      await uaa.changePassword(users[0].id, password)
+    } catch (e){
+      console.error(e)
+    }
   } else { throw new Error('not_found') }
 }
 

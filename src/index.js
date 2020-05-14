@@ -1,6 +1,6 @@
 import express from 'express'
 
-import {createUser, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, resetUserPassword, deleteUser} from './cf_api.js'
+import {createUser, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, changeUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
 import winston from  'winston'
@@ -63,9 +63,8 @@ app.put('/user/:email/:userName/password', async (req, res) => {
 
   const {password: newPassword} = req.body
 
-
-  await resetUserPassword(email, userName, newPassword)
-  res.redirect(req.query.success)
+  await changeUserPassword(email, userName, newPassword)
+  res.sendStatus(204)
 })
 
 app.delete('/user/:email/:userName', async (req, res) => {
@@ -73,7 +72,7 @@ app.delete('/user/:email/:userName', async (req, res) => {
   const {email, userName} = req.params
 
   await deleteUser(email, userName)
-  res.send(204)
+  res.sendStatus(204)
 })
 
 app.get('/user/:email', async (req, res) => {

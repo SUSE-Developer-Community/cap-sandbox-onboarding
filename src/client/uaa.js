@@ -59,7 +59,7 @@ export default class UaaApiClient {
       password
     }
 
-    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {data, headers:{'Content-Type':'application/json'}})
+    return await this.CfHttp.makeUAARequest(`/Users/${id}/password`, {method:'PUT', data, headers:{'Content-Type':'application/json'}})
   }
   
   async deleteUser(id){
