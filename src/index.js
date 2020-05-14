@@ -18,6 +18,8 @@ const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W',
 const app = express()
 app.use(express.urlencoded({extended:true}))
 
+app.use(express.json({}))
+
 app.use((req, res, next)=>{
   if(req.headers.authorization == 'Basic dGVzdDp0ZXN0cGFzc3dvcmQ='){
     next()
