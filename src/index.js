@@ -64,7 +64,11 @@ app.put('/user/:email/:userName/password', async (req, res) => {
 
   const {password: newPassword} = req.body
 
-  await changeUserPassword(email, userName, newPassword)
+  try {
+    await changeUserPassword(email, userName, newPassword)
+  } catch (e){
+    res.sendStatus(500)
+  }
   res.sendStatus(204)
 })
 
@@ -72,7 +76,11 @@ app.delete('/user/:email/:userName', async (req, res) => {
 
   const {email, userName} = req.params
 
-  await deleteUser(email, userName)
+  try {
+    await deleteUser(email, userName)
+  } catch (e){
+    res.sendStatus(404)
+  }
   res.sendStatus(204)
 })
 

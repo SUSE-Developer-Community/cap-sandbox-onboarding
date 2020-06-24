@@ -20,7 +20,6 @@ export default class CfHttpClient {
 
 
   async makeRequest(path, opts) {
-    console.log("Making CF Request from CFClient with Auth: "+this.buildAuth())
     if(!this.auth) {
       throw 'Client Not Logged In (yet?)'
     }
@@ -38,7 +37,6 @@ export default class CfHttpClient {
   }
 
   async makeUAARequest(path, opts) {
-    console.log("Making UAA Request from CF Client with Auth: "+this.buildAuth())
     if(!this.auth) {
       throw 'Client Not Logged In (yet?)'
     }

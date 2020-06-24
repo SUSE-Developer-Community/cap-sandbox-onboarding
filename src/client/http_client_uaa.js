@@ -19,7 +19,6 @@ export default class UaaHttpClient {
 
 
   async makeRequest(path, opts) {
-    console.log("Making CF Request from UAA Client with Auth: "+this.buildAuth())
     if(!this.auth) {
       throw 'Client Not Logged In (yet?)'
     }
@@ -37,7 +36,6 @@ export default class UaaHttpClient {
   }
 
   async makeUAARequest(path, opts) {
-    console.log("Making UAA Request from UAA Client with Auth: "+this.buildAuth())
     if(!this.auth) {
       throw 'Client Not Logged In (yet?)'
     }
