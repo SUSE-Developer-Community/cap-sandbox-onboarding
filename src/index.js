@@ -44,19 +44,13 @@ app.post('/user/:email/:userName', async (req, res) => {
       return
     }
 
-    winston.warn(`username ${userName}`) 
-    winston.warn(`email ${email}`)
-    winston.warn(`firstName ${firstName}`)
-    winston.warn(`lastName ${lastName}`)
-    winston.warn(`password ${password}`)
-
     const user = await createUser(userName, email, password, lastName, firstName)
     await buildEnvironmentForUser(user.metadata.guid, buildOrgNameFromUsername(userName))
 
     await sendWelcomeEmail(email, firstName, lastName, userName)
 
   } catch(e){
-    winston.warn('Something broke? \n',e)
+    console.error(e)
     res.status(500).send(e)
     return
   }

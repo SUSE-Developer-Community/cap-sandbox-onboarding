@@ -23,14 +23,7 @@ export default class UaaApiClient {
       verified: true
     }
   
-    const uaa_user = await this.CfHttp.makeUAARequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
-
-    const json = {
-      guid: uaa_user.id
-    }
-    const user = await this.CfHttp.makeRequest('/v2/users', {data:json})
-
-    return user
+    return await this.CfHttp.makeUAARequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
   }
 
   async getUserForUsername(username) {
