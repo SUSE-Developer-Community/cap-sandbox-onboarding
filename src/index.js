@@ -21,7 +21,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json({}))
 
 app.use((req, res, next)=>{
-  if(req.headers.authorization == 'Basic dGVzdDp0ZXN0cGFzc3dvcmQ='){
+  if(req.headers.authorization == `Basic ${process.env.AUTH_TOKEN}` ) {
     next()
   } 
   else {
@@ -40,19 +40,24 @@ app.post('/user/:email/:userName', async (req, res) => {
 
     if (exists) {
       winston.info('User already exists')
-      res.send(409).send({status:409, message:'User already exists'})
+      res.send({status:409, message:'User already exists'})
       return
     }
 
+    winston.warn(`username ${userName}`) 
+    winston.warn(`email ${email}`)
+    winston.warn(`firstName ${firstName}`)
+    winston.warn(`lastName ${lastName}`)
+    winston.warn(`password ${password}`)
 
-    const user = await createUser(userName, password, email, lastName, firstName)
+    const user = await createUser(userName, email, password, lastName, firstName)
     await buildEnvironmentForUser(user.metadata.guid, buildOrgNameFromUsername(userName))
 
     await sendWelcomeEmail(email, firstName, lastName, userName)
 
   } catch(e){
-    winston.warn('Something broke? Redirecting to failure \n',e)
-    res.send(500).send(e)
+    winston.warn('Something broke? \n',e)
+    res.status(500).send(e)
     return
   }
 
