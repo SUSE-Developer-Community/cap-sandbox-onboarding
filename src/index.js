@@ -77,7 +77,7 @@ app.delete('/user/:email/:userName', async (req, res) => {
   const {email, userName} = req.params
 
   try {
-    await deleteUser(email, userName)
+    await deleteUser(email, userName, buildOrgNameFromUsername(userName))
   } catch (e){
     res.sendStatus(404)
   }

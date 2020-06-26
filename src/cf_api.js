@@ -31,11 +31,17 @@ export const changeUserPassword = async (email, username, password)=>{
   } else { throw new Error('not_found') }
 }
 
-export const deleteUser = async (email, username) => {
+// Omit org_name to only delete uaa user and delete org
+export const deleteUser = async (email, username, org_name = false) => {
   const users = await uaa.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
   
   if(users.length==1){
-    await uaa.deleteUser(users[0].id) //TODO: CF Org as well?
+    await uaa.deleteUser(users[0].id)
+    await cf.deleteUser(users[0].id) 
+    if(org_name) { 
+      await cf.deleteOrg(org_name) 
+    }
+
   } else { throw new Error('not_found') }
 }
 

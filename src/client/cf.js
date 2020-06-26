@@ -40,16 +40,8 @@ export default class CfApiClient {
     return ret.resources
   }
   
-  async changePassword(id, password) {
-    const data = {
-      password
-    }
-
-    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {data, headers:{'Content-Type':'application/json'}})
-  }
-  
-  async deleteUAAUser(id){
-    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {method:'DELETE'})
+  async deleteUser(id){
+    return await this.CfHttp.makeRequest(`/v2/users/${id}`, {method:'DELETE'})
   }
 
   async getOrgForName(orgname) {
@@ -75,7 +67,7 @@ export default class CfApiClient {
     const org_definition = await this.getOrgForName(name)
     const guid = org_definition.metadata.guid
 
-    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}`, {method:'DELETE'})
+    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}?recursive=true&async=true`, {method:'DELETE'})
   }
 
   async addOrgManager(guid, user_guid) {
