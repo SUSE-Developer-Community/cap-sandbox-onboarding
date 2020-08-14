@@ -4,6 +4,7 @@ import fs from 'fs'
 const QUOTA_NAME = process.env.QUOTA_NAME
 
 
+//Checks if a user exists for given username
 export const checkIfUserExists = async (username)=>{
   try{
     cf.getUserForUsername(username)
@@ -13,12 +14,17 @@ export const checkIfUserExists = async (username)=>{
   }
 }
 
+// Creates a user in uaa and then in cf
 export const createUser = async (username, email, password, familyName, givenName) => {
   const uaa_user = await uaa.createUser(username, email, password, familyName, givenName)
+
+  //TODO: More graceful failure/rollback is UAA creates but CF doesn't
   
   return await cf.createUser(uaa_user.id)
 }
 
+
+// Changes the password of a user. Uses the email as well for a sanity check.
 export const changeUserPassword = async (email, username, password)=>{
   const users = await uaa.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
   

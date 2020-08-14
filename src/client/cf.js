@@ -54,11 +54,15 @@ export default class CfApiClient {
     return org_list.resources[0]
   }
 
-  async createOrg(name, quota) {
-    const quota_definition = await this.getQuotaForName(quota)
-    const quota_definition_guid = quota_definition.metadata.guid
+  async createOrg(name, quota_name) {
+    const json = {name}
+    try{
 
-    const json = {name, quota_definition_guid}
+      const quota_definition = await this.getQuotaForName(quota_name)
+      json.quota_definition_guid = quota_definition.metadata.guid
+    }catch(e){
+      throw `Could not find Quota GUID for ${quota_name}`
+    }
 
     return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',data:json})
   }
@@ -93,6 +97,27 @@ export default class CfApiClient {
       auditor_guids: [user_guid]
     }
     return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',data:json})
+  }
+
+  async findApps(count, idx) {
+
+    const ret = await this.CfHttp.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
+
+    return ret.resources
+  }
+
+  async findAppsV2(count, idx) {
+
+    const ret = await this.CfHttp.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
+
+    return ret.resources
+  }
+
+  async stopApp(guid) {
+    return this.CfHttp.makeRequest(`/v3/apps/${guid}/actions/stop`,{method:'POST'} )
+  }
+  async startApp(guid) {
+    return this.CfHttp.makeRequest(`/v3/apps/${guid}/actions/start`,{method:'POST'} )
   }
 
   async pushApp(space_guid, app_fs, {name, command, memory_quota, disk_quota, buildpack, host }) {

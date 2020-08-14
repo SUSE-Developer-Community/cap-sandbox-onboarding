@@ -5,13 +5,13 @@ import { LogLevel } from '@opentelemetry/core'
 
 const url = process.env.TRACING_URL
 
-
-const provider = new NodeTracerProvider({
-  logLevel: LogLevel.ERROR
-})
-provider.register()
-
 if(url){
+
+  const provider = new NodeTracerProvider({
+    logLevel: LogLevel.ERROR
+  })
+  provider.register()
+
   provider.addSpanProcessor(
     new SimpleSpanProcessor(
       new ZipkinExporter({

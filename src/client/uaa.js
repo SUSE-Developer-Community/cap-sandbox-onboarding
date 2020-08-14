@@ -41,7 +41,7 @@ export default class UaaApiClient {
         '"')
     )).join(' and ')
 
-    const ret = await this.CfHttp.makeUAARequest('/Users?filter='
+    const ret = await this.CfHttp.makeUAARequest('/Users?count=1000&filter='
     + encodeURIComponent(filterQ),{method:'GET'} )
 
     return ret.resources
