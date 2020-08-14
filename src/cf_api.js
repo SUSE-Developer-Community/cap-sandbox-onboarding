@@ -7,7 +7,7 @@ const QUOTA_NAME = process.env.QUOTA_NAME
 //Checks if a user exists for given username
 export const checkIfUserExists = async (username)=>{
   try{
-    cf.getUserForUsername(username)
+    uaa.getUserForUsername(username)
     return false
   }catch(e){
     return true

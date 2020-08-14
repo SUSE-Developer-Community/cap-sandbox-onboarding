@@ -2,55 +2,32 @@ var FormData = require('form-data')
 
 export default class CfApiClient {
   constructor (http_client) {
-    this.CfHttp = http_client
+    this.http_client = http_client
   }
 
-  // Why does there have to be a random call that's different :(
-
-  // http://docs.cloudfoundry.org/api/uaa/version/4.24.0/index.html#create-4
   // http://apidocs.cloudfoundry.org/12.39.0/users/creating_a_user.html
+  //This creates a CF user from an already created UAA user
   async createUser(uaa_user_id) {
 
     const json = {
       guid: uaa_user_id
     }
-    const user = await this.CfHttp.makeRequest('/v2/users', {data:json})
+    const user = await this.http_client.makeRequest('/v2/users', {data:json})
 
     return user
   }
-
-  async getUserForUsername(username) {
-    const users = await this.findUsers([{key:'Username',value: username}])
-    return users[0]
-  }
-
-  async findUsers(filters) {
-
-    const filterQ = filters.map((curr) => (
-      ''.concat(curr.key, ' ' , curr.comparison||'eq' ,
-        ' ' ,
-        '"' ,
-        curr.value ,
-        '"')
-    )).join(' and ')
-
-    const ret = await this.CfHttp.makeUAARequest('/Users?filter='
-    + encodeURIComponent(filterQ),{method:'GET'} )
-
-    return ret.resources
-  }
   
   async deleteUser(id){
-    return await this.CfHttp.makeRequest(`/v2/users/${id}`, {method:'DELETE'})
+    return await this.http_client.makeRequest(`/v2/users/${id}`, {method:'DELETE'})
   }
 
   async getOrgForName(orgname) {
-    const org_list = await this.CfHttp.makeRequest('/v2/organizations?q=name:' + orgname, {method:'GET'})
+    const org_list = await this.http_client.makeRequest('/v2/organizations?q=name:' + orgname, {method:'GET'})
     return org_list.resources[0]
   }
 
   async getQuotaForName(name) {
-    const org_list = await this.CfHttp.makeRequest('/v2/quota_definitions?q=name:' + name, {method:'GET'})
+    const org_list = await this.http_client.makeRequest('/v2/quota_definitions?q=name:' + name, {method:'GET'})
     return org_list.resources[0]
   }
 
@@ -64,26 +41,26 @@ export default class CfApiClient {
       throw `Could not find Quota GUID for ${quota_name}`
     }
 
-    return await this.CfHttp.makeRequest('/v2/organizations', {method:'POST',data:json})
+    return await this.http_client.makeRequest('/v2/organizations', {method:'POST',data:json})
   }
 
   async deleteOrg(name) {
     const org_definition = await this.getOrgForName(name)
     const guid = org_definition.metadata.guid
 
-    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}?recursive=true&async=true`, {method:'DELETE'})
+    return await this.http_client.makeRequest(`/v2/organizations/${guid}?recursive=true&async=true`, {method:'DELETE'})
   }
 
   async addOrgManager(guid, user_guid) {
-    await this.CfHttp.makeRequest(`/v2/organizations/${guid}/users/${user_guid}`, {method:'PUT'})
-    return await this.CfHttp.makeRequest(`/v2/organizations/${guid}/managers/${user_guid}`, {method:'PUT'})
+    await this.http_client.makeRequest(`/v2/organizations/${guid}/users/${user_guid}`, {method:'PUT'})
+    return await this.http_client.makeRequest(`/v2/organizations/${guid}/managers/${user_guid}`, {method:'PUT'})
   }
 
   // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
   async createSpace(organization_guid, name) {
 
     const json = {organization_guid, name}
-    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',data:json})
+    return await this.http_client.makeRequest('/v2/spaces', {method:'POST',data:json})
   }
 
   // http://apidocs.cloudfoundry.org/12.39.0/spaces/creating_a_space.html
@@ -96,28 +73,28 @@ export default class CfApiClient {
       manager_guids: [user_guid],
       auditor_guids: [user_guid]
     }
-    return await this.CfHttp.makeRequest('/v2/spaces', {method:'POST',data:json})
+    return await this.http_client.makeRequest('/v2/spaces', {method:'POST',data:json})
   }
 
   async findApps(count, idx) {
 
-    const ret = await this.CfHttp.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
+    const ret = await this.http_client.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
 
     return ret.resources
   }
 
   async findAppsV2(count, idx) {
 
-    const ret = await this.CfHttp.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
+    const ret = await this.http_client.makeRequest('/v3/apps?per_page='+count+'&page='+idx,{method:'GET'} )
 
     return ret.resources
   }
 
   async stopApp(guid) {
-    return this.CfHttp.makeRequest(`/v3/apps/${guid}/actions/stop`,{method:'POST'} )
+    return this.http_client.makeRequest(`/v3/apps/${guid}/actions/stop`,{method:'POST'} )
   }
   async startApp(guid) {
-    return this.CfHttp.makeRequest(`/v3/apps/${guid}/actions/start`,{method:'POST'} )
+    return this.http_client.makeRequest(`/v3/apps/${guid}/actions/start`,{method:'POST'} )
   }
 
   async pushApp(space_guid, app_fs, {name, command, memory_quota, disk_quota, buildpack, host }) {
@@ -138,7 +115,7 @@ export default class CfApiClient {
       environment_json:{}
     }
 
-    const app = await this.CfHttp.makeRequest('/v2/apps', {method:'POST', data: app_json})
+    const app = await this.http_client.makeRequest('/v2/apps', {method:'POST', data: app_json})
 
     
     // Upload bits
@@ -154,9 +131,9 @@ export default class CfApiClient {
     // This is weird and annoying but works. Can't figure out how to get axios to send the right data...
     await new Promise((res,rej)=>{
       form.submit({
-        hostname: this.CfHttp.api_url.substr('8'),
+        hostname: this.http_client.api_url.substr('8'),
         path: `/v2/apps/${app.metadata.guid}/bits`,
-        headers: {'Authorization': this.CfHttp.buildAuth()},
+        headers: {'Authorization': this.http_client.buildAuth()},
         method:'put',
         protocol: 'https:'
       }, function(err, out) {
@@ -168,11 +145,11 @@ export default class CfApiClient {
       
     // Start App
     // 
-    await this.CfHttp.makeRequest('/v2/apps/'+ app.metadata.guid, 
+    await this.http_client.makeRequest('/v2/apps/'+ app.metadata.guid, 
       {method:'PUT', data: {state: 'STARTED'}})
 
 
-    const domains = await this.CfHttp.makeRequest('/v2/domains?q=name:cap.explore.suse.dev', 
+    const domains = await this.http_client.makeRequest('/v2/domains?q=name:cap.explore.suse.dev', 
       {method:'GET'})
 
     const route_data = {
@@ -182,11 +159,11 @@ export default class CfApiClient {
     }
 
     // Add route 
-    const route = await this.CfHttp.makeRequest('/v2/routes', 
+    const route = await this.http_client.makeRequest('/v2/routes', 
       {method:'POST', data: route_data})
 
     // Map route
-    await this.CfHttp.makeRequest(`/v2/routes/${route.metadata.guid}/apps/${app.metadata.guid}`, 
+    await this.http_client.makeRequest(`/v2/routes/${route.metadata.guid}/apps/${app.metadata.guid}`, 
       {method:'PUT'})
 
   }

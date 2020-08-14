@@ -1,6 +1,6 @@
 export default class UaaApiClient {
   constructor (http_client) {
-    this.CfHttp = http_client
+    this.http_client = http_client
   }
 
   // Why does there have to be a random call that's different :(
@@ -23,7 +23,7 @@ export default class UaaApiClient {
       verified: true
     }
   
-    return await this.CfHttp.makeUAARequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
+    return await this.http_client.makeRequest('/Users', {data:uaa_json, headers:{'Content-Type':'application/json'}})
   }
 
   async getUserForUsername(username) {
@@ -41,7 +41,7 @@ export default class UaaApiClient {
         '"')
     )).join(' and ')
 
-    const ret = await this.CfHttp.makeUAARequest('/Users?count=1000&filter='
+    const ret = await this.http_client.makeRequest('/Users?count=1000&filter='
     + encodeURIComponent(filterQ),{method:'GET'} )
 
     return ret.resources
@@ -52,10 +52,10 @@ export default class UaaApiClient {
       password
     }
 
-    return await this.CfHttp.makeUAARequest(`/Users/${id}/password`, {method:'PUT', data, headers:{'Content-Type':'application/json'}})
+    return await this.http_client.makeRequest(`/Users/${id}/password`, {method:'PUT', data, headers:{'Content-Type':'application/json'}})
   }
   
   async deleteUser(id){
-    return await this.CfHttp.makeUAARequest(`/Users/${id}`, {method:'DELETE'})
+    return await this.http_client.makeRequest(`/Users/${id}`, {method:'DELETE'})
   }
 }
