@@ -1,7 +1,12 @@
 import express from 'express'
+import bcrypt from 'bcryptjs'
 
-import {createUser, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, changeUserPassword, deleteUser} from './cf_api.js'
+import {createUser, listAllUsers, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, changeUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
+
+
+import opentelemetry from '@opentelemetry/api'
+const tracer = opentelemetry.trace.getTracer('basic')
 
 import winston from  'winston'
 
@@ -21,13 +26,30 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.json({}))
 
 app.use((req, res, next)=>{
-  if(req.headers.authorization == `Basic ${process.env.AUTH_TOKEN}` ) {
-    next()
-  } 
-  else {
-    winston.error('Failed login')
-    res.send(403)
-  }
+  try {
+
+    if(!req.headers.authorization || req.headers.authorization.substr(0,5)!='Basic') {
+      winston.error('Failed login')
+      res.send(401)
+      return 
+    }
+
+    const decodedAuth = new Buffer(req.headers.authorization.split(' ')[1], 'base64').toString('utf-8')
+
+
+    bcrypt.compare(decodedAuth.split(':')[1], 
+      process.env.AUTH_HASH, 
+      (err,isMatch)=>{
+        if(!err && isMatch) {
+          next()
+        } else {
+          winston.error('Failed login')
+          res.send(403)
+        }
+      })
+  } catch(e){
+    winston.error('Error logging in')
+    res.send(403)}
 })
 
 app.post('/user/:email/:userName', async (req, res) => {
@@ -86,14 +108,27 @@ app.delete('/user/:email/:userName', async (req, res) => {
 
 app.get('/user/:email', async (req, res) => {
   const {email} = req.params
+  const span = tracer.startSpan('Getting Users for Account')
 
   try {
     const users = await listUsersWithEmail(email)
-
     res.send(users)
   }catch (e){
-    res.send(e)
+    res.send([])
   }
+  span.end()
+})
+
+app.get('/user/', async (req, res) => {
+  const span = tracer.startSpan('Getting All Users')
+
+  try {
+    const users = await listAllUsers()
+    res.send(users)
+  }catch (e){
+    res.send([])
+  }
+  span.end()
 })
 
 app.listen(8080, () => winston.info('App listening'))

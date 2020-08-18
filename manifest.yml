@@ -10,7 +10,7 @@ applications:
   - cf_api
   - aws_ses
   env:
-    AUTH_TOKEN: dGVzdDp0ZXN0cGFzc3dvcmQ=
+    AUTH_HASH: 
 
     TRACING_URL: https://zipkin.cap.explore.suse.dev/api/v2/spans
 

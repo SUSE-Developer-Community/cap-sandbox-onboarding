@@ -1,4 +1,6 @@
+import opentelemetry from '@opentelemetry/api'
 import { NodeTracerProvider } from '@opentelemetry/node'
+
 import { SimpleSpanProcessor }  from '@opentelemetry/tracing'
 import { ZipkinExporter}  from '@opentelemetry/exporter-zipkin'
 import { LogLevel } from '@opentelemetry/core'
@@ -20,5 +22,7 @@ if(url){
       })
     )
   )
+
+  opentelemetry.trace.setGlobalTracerProvider(provider)
 
 }
