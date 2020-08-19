@@ -16,6 +16,9 @@ winston.add(new winston.transports.Console({
   handleExceptions: true
 }))
 
+
+const USER_QUOTA = process.env.USER_QUOTA || 10
+
 const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
 
@@ -62,7 +65,15 @@ app.post('/user/:email/:userName', async (req, res) => {
 
     if (exists) {
       winston.info('User already exists')
-      res.send({status:409, message:'User already exists'})
+      res.status(409).send({status:409, message:'User already exists'})
+      return
+    }
+    const existingUsers = await listUsersWithEmail(email)
+    console.log(existingUsers.length)
+
+    if (existingUsers.length >= USER_QUOTA) {
+      winston.info(`Account already has ${USER_QUOTA} users`)
+      res.status(409).send({status:409, message: `Account already has ${USER_QUOTA} users`})
       return
     }
 
