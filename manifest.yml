@@ -1,6 +1,19 @@
 applications:
 - name: onboarding-js
-  buildpack: nodejs_buildpack
-  command: npm run start
+  buildpacks: 
+  - https://github.com/agracey/buildpack-minimal-npm-build.git
+  - https://github.com/agracey/buildpack-minimal-node-runner.git
   memory: 512M
+  command: ./node dist/index.js
+  services:
+  - uaa_api
+  - cf_api
+  - aws_ses
   env:
+    AUTH_HASH: 
+
+    TRACING_URL: https://zipkin.cap.explore.suse.dev/api/v2/spans
+
+    QUOTA_NAME: sandbox
+    SES_WELCOME_TEMPLATE: sandbox-ready
+

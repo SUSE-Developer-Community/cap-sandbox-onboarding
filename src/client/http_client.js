@@ -1,16 +1,16 @@
 import axios from 'axios'
-import qs from 'qs'
 
 import logger from  'winston'
 
 
 export default class CfHttpClient {
 
-  constructor(api_url, uaa_url, username, password){
+  constructor(name, api_url, loginOptions){
+    this.name = name
     this.api_url = api_url
-    this.uaa_url = uaa_url
-    this.password = password
-    this.username = username
+    this.loginOptions = loginOptions 
+
+
     this.auth = null
 
     this.login()
@@ -20,7 +20,7 @@ export default class CfHttpClient {
 
   async makeRequest(path, opts) {
     if(!this.auth) {
-      throw 'Client Not Logged In (yet?)'
+      throw `${this.name} Client Not Logged In (yet?)`
     }
 
     const url = `${this.api_url}${path}`
@@ -35,52 +35,22 @@ export default class CfHttpClient {
     return ret.data
   }
 
-  async makeUAARequest(path, opts) {
-    if(!this.auth) {
-      throw 'Client Not Logged In (yet?)'
-    }
-
-    const url = `${this.uaa_url}${path}`
-
-    const options = JSON.parse(JSON.stringify(opts || {}))
-    options.method = options.method || 'post'
-    if(!options.headers) options.headers={}
-    options.headers.Authorization = this.buildAuth()
-    
-    options.url = url
-    const ret = await axios(options)
-    return ret.data
-  }
-
   buildAuth() {
     return `${this.auth.token_type || 'Bearer'} ${this.auth.access_token}`
   }
 
   async login(){
-    logger.info('Logging in')
+    logger.info(`Logging ${this.name} in`)
     try {
 
-      const options = {
-        url: `${this.uaa_url}/oauth/token`,
-        method: 'post',
-        headers: {
-          Authorization: 'Basic Y2Y6',
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        },
-        data: qs.stringify({
-          grant_type: 'password',
-          client_id: 'cf',
-          username: this.username,
-          password: this.password
-        })
-      }
+      const options = this.loginOptions
 
       const ret = await axios(options)
       this.auth = ret.data
-      logger.info('Logged In!')
+      logger.info(`${this.name} Logged In!`)
       
     } catch(e) {
-      logger.error('Error Logging in ', e)
+      logger.error(`Error Logging in ${this.name}`, e)
     }
   }
 

@@ -1,33 +1,95 @@
-import {cf} from './client/index.js' //Eventually move to separate lib
+import {cf, uaa} from './client/index.js' //Eventually move to separate lib
 import fs from 'fs'
+
 
 const QUOTA_NAME = process.env.QUOTA_NAME
 
 
-
-//Assuming that if org exists, user does as well. 
-// If not true, will need manual intervention anyways
+//Checks if a user exists for given username
 export const checkIfUserExists = async (username)=>{
-  const org = await cf.getOrgForName(buildOrgNameFromUsername(username))
-  return !!org
+  try{
+    uaa.getUserForUsername(username)
+    return false
+  }catch(e){
+    return true
+  }
 }
 
-export const buildOrgNameFromUsername =(username)=>(username.replace(new RegExp('\\W','g' ), '_'))
+// Creates a user in uaa and then in cf
+export const createUser = async (username, email, password, familyName, givenName) => {
+  const uaa_user = await uaa.createUser(username, email, password, familyName, givenName)
 
-export const buildEnvironmentForUser = async (username, password, email, familyName, givenName) => {
+  //TODO: More graceful failure/rollback is UAA creates but CF doesn't
+  
+  return await cf.createUser(uaa_user.id)
+}
 
-  const user = await cf.createUser(username, email, password, familyName, givenName )
 
-  const org_name = buildOrgNameFromUsername(username)
+// Changes the password of a user. Uses the email as well for a sanity check.
+export const changeUserPassword = async (email, username, password)=>{
+  const users = await uaa.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
+  
+  if(users.length==1){
+    try{
+      await uaa.changePassword(users[0].id, password)
+    } catch (e){
+      console.error(e)
+    }
+  } else { throw new Error('not_found') }
+}
+
+// Omit org_name to only delete uaa user and delete org
+export const deleteUser = async (email, username, org_name = false) => {
+  const users = await uaa.findUsers([{key:'Email',value:email}, {key: 'Username',value: username}])
+  
+  if(users.length==1){
+    await uaa.deleteUser(users[0].id)
+    await cf.deleteUser(users[0].id) 
+    if(org_name) { 
+      await cf.deleteOrg(org_name) 
+    }
+
+  } else { throw new Error('not_found') }
+}
+
+export const listUsersWithEmail = async (email)=> {
+  const users = await uaa.findUsers([{key:'Email',value:email}])
+  
+  const ret = users.map((u)=>({
+    userName: u.userName, 
+    lastLogonTime: u.lastLogonTime, 
+    passwordLastModified: u.passwordLastModified,
+    created: u.created,
+    active: u.active
+  }))
+
+  return ret
+}
+
+export const listAllUsers = async ()=>{
+  const users = await uaa.findUsers([])
+  const ret = users.map((u)=>({
+    userName: u.userName,
+    email: u.emails[0].value,
+    lastLogonTime: u.lastLogonTime, 
+    passwordLastModified: u.passwordLastModified,
+    created: u.created,
+    active: u.active
+  }))
+
+  return ret
+}
+
+export const buildEnvironmentForUser = async (user_id, org_name) => {
 
   const org = await cf.createOrg(org_name, QUOTA_NAME)
 
-  await cf.addOrgManager(org.metadata.guid, user.metadata.guid)
+  await cf.addOrgManager(org.metadata.guid, user_id)
 
   
-  await cf.createSpaceForUser(org.metadata.guid, 'dev', user.metadata.guid)
-  await cf.createSpaceForUser(org.metadata.guid, 'test', user.metadata.guid)
-  const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user.metadata.guid)
+  await cf.createSpaceForUser(org.metadata.guid, 'dev', user_id)
+  await cf.createSpaceForUser(org.metadata.guid, 'test', user_id)
+  const samples_space = await cf.createSpaceForUser(org.metadata.guid, 'samples', user_id)
   
 
   cf.pushApp(samples_space.metadata.guid, fs.createReadStream('./12factor.zip'), {
