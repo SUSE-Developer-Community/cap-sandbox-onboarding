@@ -22,6 +22,8 @@ const USER_QUOTA = process.env.USER_QUOTA || 10
 const buildOrgNameFromUsername = (username)=>(username.replace(new RegExp('\\W','g' ), '_'))
 
 
+const decodeEmailFromReq = (req) => (new Buffer(req.params.email,'base64').toString('utf-8'))
+
 
 const app = express()
 app.use(express.urlencoded({extended:true}))
@@ -37,7 +39,7 @@ app.use((req, res, next)=>{
       return 
     }
 
-    const decodedAuth = new Buffer(req.headers.authorization.split(' ')[1], 'base64').toString('utf-8')
+    const decodedAuth = new Buffer.from(req.headers.authorization.split(' ')[1], 'base64').toString('utf-8')
 
 
     bcrypt.compare(decodedAuth.split(':')[1], 
@@ -56,7 +58,8 @@ app.use((req, res, next)=>{
 })
 
 app.post('/user/:email/:userName', async (req, res) => {
-  const {email, userName} = req.params
+  const {userName} = req.params
+  const email = decodeEmailFromReq(req)
 
   const {firstName, lastName, password} = req.body
 
@@ -93,8 +96,8 @@ app.post('/user/:email/:userName', async (req, res) => {
 
 app.put('/user/:email/:userName/password', async (req, res) => {
 
-  const {email, userName} = req.params
-
+  const {userName} = req.params
+  const email = decodeEmailFromReq(req)
   const {password: newPassword} = req.body
 
   try {
@@ -107,7 +110,8 @@ app.put('/user/:email/:userName/password', async (req, res) => {
 
 app.delete('/user/:email/:userName', async (req, res) => {
 
-  const {email, userName} = req.params
+  const {userName} = req.params
+  const email = decodeEmailFromReq(req)
 
   try {
     await deleteUser(email, userName, buildOrgNameFromUsername(userName))
@@ -118,7 +122,7 @@ app.delete('/user/:email/:userName', async (req, res) => {
 })
 
 app.get('/user/:email', async (req, res) => {
-  const {email} = req.params
+  const email = decodeEmailFromReq(req)
   const span = tracer.startSpan('Getting Users for Account')
 
   try {
