@@ -4,10 +4,6 @@ import bcrypt from 'bcryptjs'
 import {createUser, listAllUsers, listUsersWithEmail, checkIfUserExists, buildEnvironmentForUser, changeUserPassword, deleteUser} from './cf_api.js'
 import {sendWelcomeEmail} from './email.js'
 
-
-import opentelemetry from '@opentelemetry/api'
-const tracer = opentelemetry.trace.getTracer('basic')
-
 import winston from  'winston'
 
 winston.level = process.env.LOG_LEVEL || 'debug'
@@ -123,7 +119,6 @@ app.delete('/user/:email/:userName', async (req, res) => {
 
 app.get('/user/:email', async (req, res) => {
   const email = decodeEmailFromReq(req)
-  const span = tracer.startSpan('Getting Users for Account')
 
   try {
     const users = await listUsersWithEmail(email)
@@ -131,11 +126,9 @@ app.get('/user/:email', async (req, res) => {
   }catch (e){
     res.send([])
   }
-  span.end()
 })
 
 app.get('/user/', async (req, res) => {
-  const span = tracer.startSpan('Getting All Users')
 
   try {
     const users = await listAllUsers()
@@ -143,7 +136,6 @@ app.get('/user/', async (req, res) => {
   }catch (e){
     res.send([])
   }
-  span.end()
 })
 
 app.listen(8080, () => winston.info('App listening'))

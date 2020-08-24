@@ -4,7 +4,7 @@ applications:
   - https://github.com/agracey/buildpack-minimal-npm-build.git
   - https://github.com/agracey/buildpack-minimal-node-runner.git
   memory: 512M
-  command: ./node -r ./dist/tracer.js dist/index.js
+  command: ./node dist/index.js
   services:
   - uaa_api
   - cf_api

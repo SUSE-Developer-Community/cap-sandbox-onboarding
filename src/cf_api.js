@@ -1,8 +1,6 @@
 import {cf, uaa} from './client/index.js' //Eventually move to separate lib
 import fs from 'fs'
 
-import opentelemetry from '@opentelemetry/api'
-const tracer = opentelemetry.trace.getTracer('basic')
 
 const QUOTA_NAME = process.env.QUOTA_NAME
 
@@ -55,7 +53,6 @@ export const deleteUser = async (email, username, org_name = false) => {
 }
 
 export const listUsersWithEmail = async (email)=> {
-  const span = tracer.startSpan('listUsersWithEmail')
   const users = await uaa.findUsers([{key:'Email',value:email}])
   
   const ret = users.map((u)=>({
@@ -65,7 +62,6 @@ export const listUsersWithEmail = async (email)=> {
     created: u.created,
     active: u.active
   }))
-  span.end()
 
   return ret
 }

@@ -6,7 +6,8 @@
   "scripts": {
     "pull-user-list": "node dist/pull_user_list.js",
     "test": "npm run build && node dist/test.js",
-    "start": "node  -r ./dist/tracer.js dist/index.js",
+    "start": "node dist/index.js",
+    "start-trace": "node  -r ./dist/tracer.js dist/index.js",
     "build": "babel src/ -d dist/",
     "lint": "eslint ./src",
     "lint-fix": "eslint --fix ./src"
